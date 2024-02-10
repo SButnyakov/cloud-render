@@ -2,8 +2,11 @@ package main
 
 import (
 	"cloud-render/internal/db/postgres"
+	"cloud-render/internal/http/auth"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
+	"cloud-render/internal/repository"
+	"cloud-render/internal/service"
 	"context"
 	"errors"
 	"fmt"
@@ -43,8 +46,17 @@ func main() {
 		postgres.MigrateTop(pg, "file://../../../migrations/auth/postgres")
 	}
 
+	// Repositories
+	userRepository := repository.NewUserRepository(pg)
+
+	// Services
+	userService := service.NewUserService(userRepository)
+
 	// Router
 	router := chi.NewRouter()
+
+	// Router handlers
+	router.Post("/signup", auth.SignUp(log, userService))
 
 	// Server
 	httpServer := http.Server{

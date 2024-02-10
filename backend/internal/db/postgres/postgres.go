@@ -4,6 +4,12 @@ import (
 	"cloud-render/internal/lib/config"
 	"database/sql"
 	"fmt"
+
+	_ "github.com/lib/pq"
+)
+
+const (
+	UniqueViolationErrorCode = "23505"
 )
 
 func New(cfg config.DB) (*sql.DB, error) {
