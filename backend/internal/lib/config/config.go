@@ -11,6 +11,7 @@ import (
 type Config struct {
 	Env        string `env:"ENV" env-default:"local"`
 	HTTPServer `yaml:"http_server"`
+	DB         `yaml:"db"`
 }
 
 type HTTPServer struct {
@@ -18,6 +19,14 @@ type HTTPServer struct {
 	Port        int           `yaml:"port" env-default:"8080"`
 	Timeout     time.Duration `env:"timeout" env-default:"4s"`
 	IdleTimeout time.Duration `env:"idle_timeout" env-default:"30s"`
+}
+
+type DB struct {
+	Name     string `yaml:"name" env-required:"true"`
+	User     string `yaml:"user" env-default:"user"`
+	Password string `yaml:"password" env-default:"password"`
+	Host     string `yaml:"host" env-default:"postgres"`
+	Port     string `yaml:"port" env-default:"5432"`
 }
 
 func MustLoad(configPath string) *Config {
