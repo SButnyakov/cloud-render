@@ -38,6 +38,11 @@ func main() {
 	}
 	defer pg.Close()
 
+	// Migrating
+	if cfg.Env == "dev" || cfg.Env == "prod" {
+		postgres.MigrateTop(pg, "file://../../../migrations/api/postgres")
+	}
+
 	// Router
 	router := chi.NewRouter()
 
