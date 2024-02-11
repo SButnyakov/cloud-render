@@ -10,10 +10,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const (
-	packagePath = "repository.user."
-)
-
 type UserRepository struct {
 	db *sql.DB
 }
@@ -23,7 +19,7 @@ func NewUserRepository(db *sql.DB) *UserRepository {
 }
 
 func (u *UserRepository) CreateUser(user models.User) error {
-	const fn = packagePath + "Create"
+	const fn = packagePath + "user.CreateUser"
 
 	stmt, err := u.db.Prepare("INSERT INTO users(login, email, password) values($1, $2, $3)")
 	if err != nil {
@@ -43,7 +39,7 @@ func (u *UserRepository) CreateUser(user models.User) error {
 }
 
 func (u *UserRepository) CheckCredentials(loginOrEmail, password string) (int64, error) {
-	const fn = packagePath + "CheckCredentials"
+	const fn = packagePath + "user.CheckCredentials"
 
 	stmt, err := u.db.Prepare("SELECT id FROM users WHERE (login=$1 OR email=$1) AND password=$2")
 	if err != nil {
@@ -65,7 +61,7 @@ func (u *UserRepository) CheckCredentials(loginOrEmail, password string) (int64,
 }
 
 func (u *UserRepository) UpdateRefreshToken(uid int64, refreshToken string) error {
-	const fn = packagePath + "UpdateRefreshToken"
+	const fn = packagePath + "user.UpdateRefreshToken"
 
 	stmt, err := u.db.Prepare("UPDATE users SET refresh_token = $1 WHERE id = $2")
 	if err != nil {
@@ -78,4 +74,26 @@ func (u *UserRepository) UpdateRefreshToken(uid int64, refreshToken string) erro
 	}
 
 	return nil
+}
+
+func (u *UserRepository) GetRefreshToken(uid int64) (string, error) {
+	const fn = packagePath + "user.GetRefreshToken"
+
+	stmt, err := u.db.Prepare("SELECT refresh_token FROM users WHERE id = $1")
+	if err != nil {
+		return "", fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	var token string
+
+	err = stmt.QueryRow(uid).Scan(&token)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", ErrUserNotFound
+		}
+
+		return "", fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return token, nil
 }

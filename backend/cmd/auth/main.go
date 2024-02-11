@@ -73,7 +73,6 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 	router.Use(cors.New())
-	router.Use(auth.New(log, jwtManager))
 
 	// Router handlers
 	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))

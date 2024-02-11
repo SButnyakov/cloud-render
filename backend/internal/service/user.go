@@ -6,12 +6,14 @@ import (
 	"cloud-render/internal/models"
 	"cloud-render/internal/repository"
 	"errors"
+	"strconv"
 )
 
 type UserProvider interface {
 	CreateUser(user models.User) error
 	CheckCredentials(loginOrEmail, password string) (int64, error)
 	UpdateRefreshToken(uid int64, refreshToken string) error
+	GetRefreshToken(uid int64) (string, error)
 }
 
 type UserService struct {
@@ -50,20 +52,60 @@ func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error
 		return nil, err
 	}
 
-	accessToken, err := s.tokenManager.NewJWT(id)
-	if err != nil {
-		return nil, err
-	}
-
-	refreshToken, err := s.tokenManager.NewRT(id)
-	if err != nil {
-		return nil, err
-	}
-
-	err = s.userProvider.UpdateRefreshToken(id, refreshToken)
+	accessToken, refreshToken, err := s.updateTokens(id)
 	if err != nil {
 		return nil, err
 	}
 
 	return &dto.AuthUserDTO{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+}
+
+func (s *UserService) ReAuthUser(userDTO dto.ReAuthUserDTO) (*dto.ReAuthUserDTO, error) {
+	claims, err := s.tokenManager.Parse(userDTO.RefreshToken)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := strconv.ParseInt(claims.Subject, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	token, err := s.userProvider.GetRefreshToken(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return nil, ErrInvalidCredentials
+		}
+		return nil, err
+	}
+
+	if token != userDTO.RefreshToken {
+		return nil, ErrInvalidCredentials
+	}
+
+	accessToken, refreshToken, err := s.updateTokens(id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.ReAuthUserDTO{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+}
+
+func (s *UserService) updateTokens(id int64) (string, string, error) {
+	accessToken, err := s.tokenManager.NewJWT(id)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err := s.tokenManager.NewRT(id)
+	if err != nil {
+		return "", "", err
+	}
+
+	err = s.userProvider.UpdateRefreshToken(id, refreshToken)
+	if err != nil {
+		return "", "", err
+	}
+
+	return accessToken, refreshToken, nil
 }

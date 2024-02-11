@@ -12,3 +12,8 @@ type AuthUserDTO struct {
 	AccessToken  string
 	RefreshToken string
 }
+
+type ReAuthUserDTO struct {
+	AccessToken  string
+	RefreshToken string
+}
