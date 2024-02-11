@@ -17,3 +17,10 @@ type ReAuthUserDTO struct {
 	AccessToken  string
 	RefreshToken string
 }
+
+type EditUserDTO struct {
+	Id       int64
+	Login    string
+	Email    string
+	Password string
+}

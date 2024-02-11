@@ -31,8 +31,10 @@ type DB struct {
 }
 
 type Paths struct {
-	SignUp string `yaml:"signup" env-required:"false"`
-	SignIn string `yaml:"signin" env-required:"false"`
+	SignUp  string `yaml:"signup" env-required:"false"`
+	SignIn  string `yaml:"signin" env-required:"false"`
+	Refresh string `yaml:"refresh" env-required:"false"`
+	Edit    string `yaml:"edit" env-required:"false"`
 }
 
 func MustLoad(configPath string) *Config {

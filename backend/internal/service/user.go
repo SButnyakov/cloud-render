@@ -11,6 +11,7 @@ import (
 
 type UserProvider interface {
 	CreateUser(user models.User) error
+	UpdateUser(user models.User) error
 	CheckCredentials(loginOrEmail, password string) (int64, error)
 	UpdateRefreshToken(uid int64, refreshToken string) error
 	GetRefreshToken(uid int64) (string, error)
@@ -43,6 +44,22 @@ func (s *UserService) CreateUser(userDTO dto.CreateUserDTO) error {
 	return nil
 }
 
+func (s *UserService) EditUer(userDTO dto.EditUserDTO) error {
+	err := s.userProvider.UpdateUser(models.User{
+		Id:       userDTO.Id,
+		Login:    userDTO.Login,
+		Email:    userDTO.Email,
+		Password: userDTO.Password,
+	})
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return ErrInvalidCredentials
+		}
+		return err
+	}
+	return nil
+}
+
 func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error) {
 	id, err := s.userProvider.CheckCredentials(userDTO.LoginOrEmail, userDTO.Password)
 	if err != nil {
@@ -60,7 +77,7 @@ func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error
 	return &dto.AuthUserDTO{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 }
 
-func (s *UserService) ReAuthUser(userDTO dto.ReAuthUserDTO) (*dto.ReAuthUserDTO, error) {
+func (s *UserService) ReauthUser(userDTO dto.ReAuthUserDTO) (*dto.ReAuthUserDTO, error) {
 	claims, err := s.tokenManager.Parse(userDTO.RefreshToken)
 	if err != nil {
 		return nil, err

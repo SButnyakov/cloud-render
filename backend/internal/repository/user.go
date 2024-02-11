@@ -38,6 +38,25 @@ func (u *UserRepository) CreateUser(user models.User) error {
 	return nil
 }
 
+func (u *UserRepository) UpdateUser(user models.User) error {
+	const fn = packagePath + "user.Update"
+
+	stmt, err := u.db.Prepare("UPDATE users SET login=$2, email=$3, password=$4 WHERE id=$1")
+	if err != nil {
+		return fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	_, err = stmt.Exec(user.Id, user.Login, user.Email, user.Password)
+	if errors.Is(err, sql.ErrNoRows) {
+		return ErrUserNotFound
+	}
+	if err != nil {
+		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return nil
+}
+
 func (u *UserRepository) CheckCredentials(loginOrEmail, password string) (int64, error) {
 	const fn = packagePath + "user.CheckCredentials"
 
