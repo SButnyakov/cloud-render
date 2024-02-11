@@ -46,7 +46,7 @@ func main() {
 
 	// Migrating
 	if cfg.Env == "dev" || cfg.Env == "prod" {
-		postgres.MigrateTop(pg, "file://../../../migrations/api/postgres")
+		postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
 	}
 
 	// JWT manager

@@ -16,18 +16,19 @@ type Config struct {
 }
 
 type HTTPServer struct {
-	Host        string        `env:"host" env-default:"localhost"`
+	Host        string        `yaml:"host" env-default:"localhost"`
 	Port        int           `yaml:"port" env-default:"8080"`
-	Timeout     time.Duration `env:"timeout" env-default:"4s"`
-	IdleTimeout time.Duration `env:"idle_timeout" env-default:"30s"`
+	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
+	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"30s"`
 }
 
 type DB struct {
-	Name     string `yaml:"name" env-required:"true"`
-	User     string `yaml:"user" env-default:"user"`
-	Password string `yaml:"password" env-default:"password"`
-	Host     string `yaml:"host" env-default:"postgres"`
-	Port     string `yaml:"port" env-default:"5432"`
+	Name           string `yaml:"name" env-required:"true"`
+	User           string `yaml:"user" env-default:"user"`
+	Password       string `yaml:"password" env-default:"password"`
+	Host           string `yaml:"host" env-default:"postgres"`
+	Port           string `yaml:"port" env-default:"5432"`
+	MigrationsPath string `yaml:"migrations_path", env-required:"true"`
 }
 
 type Paths struct {
