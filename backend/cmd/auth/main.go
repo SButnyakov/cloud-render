@@ -3,8 +3,11 @@ package main
 import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/http/auth"
+	"cloud-render/internal/http/middleware/cors"
+	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
+	"cloud-render/internal/lib/tokenManager"
 	"cloud-render/internal/repository"
 	"cloud-render/internal/service"
 	"context"
@@ -18,11 +21,13 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	// Envs
 	cfgPath := os.Getenv("AUTH_CONFIG_PATH")
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -46,14 +51,29 @@ func main() {
 		postgres.MigrateTop(pg, "file://../../../migrations/auth/postgres")
 	}
 
+	// JWT manager
+	jwtManager, err := tokenManager.New(jwtSecretKey)
+	if err != nil {
+		log.Error("failed to initialize jwt token manager", sl.Err(err))
+		os.Exit(-1)
+	}
+
 	// Repositories
 	userRepository := repository.NewUserRepository(pg)
 
 	// Services
-	userService := service.NewUserService(userRepository)
+	userService := service.NewUserService(userRepository, jwtManager)
 
 	// Router
 	router := chi.NewRouter()
+
+	// Router middleware
+	router.Use(middleware.RequestID)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+	router.Use(cors.New())
+	router.Use(auth.New(log, jwtManager))
 
 	// Router handlers
 	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))

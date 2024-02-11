@@ -2,8 +2,10 @@ package main
 
 import (
 	"cloud-render/internal/db/postgres"
+	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
+	"cloud-render/internal/lib/tokenManager"
 	"context"
 	"errors"
 	"fmt"
@@ -15,11 +17,13 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func main() {
 	// Envs
 	cfgPath := os.Getenv("BUFFER_CONFIG_PATH")
+	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -38,8 +42,22 @@ func main() {
 	}
 	defer pg.Close()
 
+	// JWT manager
+	jwtManager, err := tokenManager.New(jwtSecretKey)
+	if err != nil {
+		log.Error("failed to initialize jwt token manager", sl.Err(err))
+		os.Exit(-1)
+	}
+	_ = jwtManager
+
 	// Router
 	router := chi.NewRouter()
+
+	// Router middleware
+	router.Use(middleware.RequestID)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 
 	// Server
 	httpServer := http.Server{
