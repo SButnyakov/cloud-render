@@ -56,8 +56,8 @@ func main() {
 	router := chi.NewRouter()
 
 	// Router handlers
-	router.Post("/signup", auth.SignUp(log, userService))
-	router.Post("/signin", auth.SignIn(log, userService))
+	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))
+	router.Post(cfg.Paths.SignIn, auth.SignIn(log, userService))
 
 	// Server
 	httpServer := http.Server{

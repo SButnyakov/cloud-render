@@ -12,6 +12,7 @@ type Config struct {
 	Env        string `env:"ENV" env-default:"local"`
 	HTTPServer `yaml:"http_server"`
 	DB         `yaml:"db"`
+	Paths      `yaml:"paths"`
 }
 
 type HTTPServer struct {
@@ -27,6 +28,11 @@ type DB struct {
 	Password string `yaml:"password" env-default:"password"`
 	Host     string `yaml:"host" env-default:"postgres"`
 	Port     string `yaml:"port" env-default:"5432"`
+}
+
+type Paths struct {
+	SignUp string `yaml:"signup" env-required:"false"`
+	SignIn string `yaml:"signin" env-required:"false"`
 }
 
 func MustLoad(configPath string) *Config {
