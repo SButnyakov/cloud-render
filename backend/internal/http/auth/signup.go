@@ -14,11 +14,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-const (
-	packagePath = "http.auth.signup."
-)
-
-type Request struct {
+type SignUpRequest struct {
 	Login    string `json:"login" validate:"required,min=4,max=15"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=8,max=30"`
@@ -34,9 +30,9 @@ type UserCreator interface {
 
 func SignUp(log *slog.Logger, userCreator UserCreator) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		const fn = packagePath + "New"
+		const fn = packagePath + "signup.SignUp"
 
-		var req Request
+		var req SignUpRequest
 
 		err := render.DecodeJSON(r.Body, &req)
 		if errors.Is(err, io.EOF) {
@@ -72,18 +68,6 @@ func SignUp(log *slog.Logger, userCreator UserCreator) http.HandlerFunc {
 			return
 		}
 
-		responseOK(w, r)
+		responseOK(w, r, resp.OK())
 	}
-}
-
-func responseError(w http.ResponseWriter, r *http.Request, response resp.Response, status int) {
-	w.WriteHeader(status)
-	render.JSON(w, r, response)
-}
-
-func responseOK(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-	render.JSON(w, r, Response{
-		Response: resp.OK(),
-	})
 }

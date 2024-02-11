@@ -57,6 +57,7 @@ func main() {
 
 	// Router handlers
 	router.Post("/signup", auth.SignUp(log, userService))
+	router.Post("/signin", auth.SignIn(log, userService))
 
 	// Server
 	httpServer := http.Server{
