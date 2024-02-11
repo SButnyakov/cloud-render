@@ -68,6 +68,6 @@ func SignUp(log *slog.Logger, userCreator UserCreator) http.HandlerFunc {
 			return
 		}
 
-		responseOK(w, r, resp.OK())
+		responseOK(w, r, resp.OK(), http.StatusCreated)
 	}
 }

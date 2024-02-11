@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	packagePath = "http.auth.signin."
+	packagePath = "http.auth."
 )
 
 func responseError(w http.ResponseWriter, r *http.Request, response resp.Response, status int) {
@@ -16,8 +16,12 @@ func responseError(w http.ResponseWriter, r *http.Request, response resp.Respons
 	render.JSON(w, r, response)
 }
 
-func responseOK(w http.ResponseWriter, r *http.Request, v interface{}) {
-	w.WriteHeader(http.StatusOK)
+func responseOK(w http.ResponseWriter, r *http.Request, v interface{}, status ...int) {
+	responseStatus := http.StatusOK
+	if len(status) > 0 {
+		responseStatus = status[0]
+	}
+	w.WriteHeader(responseStatus)
 	render.JSON(w, r, Response{
 		Response: resp.OK(),
 	})
