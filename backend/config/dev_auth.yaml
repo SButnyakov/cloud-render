@@ -13,3 +13,5 @@ db:
 paths:
   signup: "/signup"
   signin: "/signin"
+  refresh: "/refresh"
+  edit: "/edit"
