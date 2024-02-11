@@ -19,9 +19,10 @@ type UserService struct {
 	tokenManager *tokenManager.Manager
 }
 
-func NewUserService(userProvider UserProvider) *UserService {
+func NewUserService(userProvider UserProvider, tokenManager *tokenManager.Manager) *UserService {
 	return &UserService{
 		userProvider: userProvider,
+		tokenManager: tokenManager,
 	}
 }
 
