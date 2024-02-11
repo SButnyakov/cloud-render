@@ -10,3 +10,6 @@ db:
   password: "password"
   host: "postgres"
   port: "5432"
+paths:
+  signup: "/signup"
+  signin: "/signin"
