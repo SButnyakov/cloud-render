@@ -11,6 +11,7 @@ import (
 
 type UserProvider interface {
 	CreateUser(user models.User) error
+	GetOneUser(uid int64) (*models.User, error)
 	UpdateUser(user models.User) error
 	CheckCredentials(loginOrEmail, password string) (int64, error)
 	UpdateRefreshToken(uid int64, refreshToken string) error
@@ -42,6 +43,21 @@ func (s *UserService) CreateUser(userDTO dto.CreateUserDTO) error {
 		return err
 	}
 	return nil
+}
+
+func (s *UserService) GetUser(id int64) (*dto.GetUserDTO, error) {
+	user, err := s.userProvider.GetOneUser(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrUserNotFound) {
+			return nil, ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &dto.GetUserDTO{
+		Id:    user.Id,
+		Login: user.Login,
+		Email: user.Email,
+	}, nil
 }
 
 func (s *UserService) EditUer(userDTO dto.EditUserDTO) error {

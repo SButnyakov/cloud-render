@@ -38,6 +38,27 @@ func (u *UserRepository) CreateUser(user models.User) error {
 	return nil
 }
 
+func (u *UserRepository) GetOneUser(uid int64) (*models.User, error) {
+	const fn = packagePath + "user.GetOneUser"
+
+	var resUser models.User
+
+	stmt, err := u.db.Prepare("SELECT id, login, email FROM users WHERE id=$1")
+	if err != nil {
+		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	err = stmt.QueryRow(uid).Scan(&resUser.Id, &resUser.Login, &resUser.Email)
+	if errors.Is(err, sql.ErrNoRows) {
+		return nil, ErrUserNotFound
+	}
+	if err != nil {
+		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return &resUser, nil
+}
+
 func (u *UserRepository) UpdateUser(user models.User) error {
 	const fn = packagePath + "user.Update"
 

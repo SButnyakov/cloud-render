@@ -24,3 +24,9 @@ type EditUserDTO struct {
 	Email    string
 	Password string
 }
+
+type GetUserDTO struct {
+	Id    int64
+	Login string
+	Email string
+}

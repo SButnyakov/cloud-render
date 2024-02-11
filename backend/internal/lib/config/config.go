@@ -35,6 +35,7 @@ type Paths struct {
 	SignIn  string `yaml:"signin" env-required:"false"`
 	Refresh string `yaml:"refresh" env-required:"false"`
 	Edit    string `yaml:"edit" env-required:"false"`
+	Info    string `yaml:"info" env-required:"false"`
 }
 
 func MustLoad(configPath string) *Config {

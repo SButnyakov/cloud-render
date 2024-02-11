@@ -77,6 +77,8 @@ func main() {
 	// Router handlers
 	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))
 	router.Post(cfg.Paths.SignIn, auth.SignIn(log, userService))
+	router.Put(cfg.Paths.Edit, auth.Edit(log, userService))
+	router.Get(cfg.Paths.Info, auth.Info(log, userService))
 
 	// Server
 	httpServer := http.Server{
