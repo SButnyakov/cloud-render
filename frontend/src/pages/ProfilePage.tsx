@@ -343,3 +343,5 @@ const ProfilePage = observer(() => {
 })
 
 export default ProfilePage
+
+/* Create orders table */
