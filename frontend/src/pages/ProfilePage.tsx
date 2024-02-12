@@ -347,3 +347,4 @@ export default ProfilePage
 /* Create orders table */
 /* Add order actions */
 /* Add profile block */
+/* Add edit profile information logic */
