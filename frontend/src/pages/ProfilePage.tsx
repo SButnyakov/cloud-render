@@ -350,4 +350,4 @@ export default ProfilePage
 /* Add edit profile information logic */
 /* Add subscription logic */
 /* Http controls for order status page */
-/* Add modal for quit from acc */
+/* Add modal page for buy subscription */
