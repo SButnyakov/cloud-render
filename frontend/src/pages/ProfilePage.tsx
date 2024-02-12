@@ -348,3 +348,4 @@ export default ProfilePage
 /* Add order actions */
 /* Add profile block */
 /* Add edit profile information logic */
+/* Add subscription logic */
