@@ -346,3 +346,4 @@ export default ProfilePage
 
 /* Create orders table */
 /* Add order actions */
+/* Add profile block */
