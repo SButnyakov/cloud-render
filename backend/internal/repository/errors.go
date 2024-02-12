@@ -14,4 +14,5 @@ var (
 
 	ErrNoSubscriptionTypes = errors.New("no subscription types found")
 	ErrNoPaymentTypes      = errors.New("no payment types found")
+	ErrNoOrderStatuses     = errors.New("no order statuses found")
 )

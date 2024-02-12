@@ -16,7 +16,7 @@ func NewPaymentTypeRepository(db *sql.DB) *PaymentTypeRepository {
 }
 
 func (pt *PaymentTypeRepository) GetTypesMap() (map[string]int64, error) {
-	const fn = "postgres.repos.payment_types.GetTypesMap"
+	const fn = packagePath + "payment_types.GetTypesMap"
 
 	stmt, err := pt.db.Prepare("SELECT id, name FROM payment_types")
 	if err != nil {
@@ -26,7 +26,7 @@ func (pt *PaymentTypeRepository) GetTypesMap() (map[string]int64, error) {
 	rows, err := stmt.Query()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, storage.ErrNoPaymentTypes)
+			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrNoPaymentTypes)
 		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
