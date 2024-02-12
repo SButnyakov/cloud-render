@@ -11,6 +11,11 @@ db:
   host: "localhost"
   port: "5432"
   migrations_path: "file://../../../migrations/api/postgres"
+redis:
+  address: "localhost:6379"
+  password: "password"
+  queue_name: "render-list"
+  priority_queue_name: "subscribed-render-list"
 paths:
   user: "/user"
   subscribe: "/susbcribe"

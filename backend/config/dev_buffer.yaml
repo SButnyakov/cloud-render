@@ -10,3 +10,8 @@ db:
   password: "password"
   host: "postgres"
   port: "5432"
+redis:
+  address: "redis:6379"
+  password: "password"
+  queue_name: "render-list"
+  priority_queue_name: "subscribed-render-list"
