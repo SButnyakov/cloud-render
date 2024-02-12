@@ -54,7 +54,6 @@ func (s *UserService) GetUser(id int64) (*dto.GetUserDTO, error) {
 		return nil, err
 	}
 	return &dto.GetUserDTO{
-		Id:    user.Id,
 		Login: user.Login,
 		Email: user.Email,
 	}, nil

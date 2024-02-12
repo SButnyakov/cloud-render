@@ -1,4 +1,4 @@
-package auth
+package api
 
 import (
 	resp "cloud-render/internal/lib/response"
@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	packagePath = "http.auth."
+	packagePath = "http.api."
 )
 
 func responseError(w http.ResponseWriter, r *http.Request, response resp.Response, status int) {

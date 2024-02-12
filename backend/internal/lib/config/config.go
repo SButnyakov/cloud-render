@@ -13,6 +13,7 @@ type Config struct {
 	HTTPServer `yaml:"http_server"`
 	DB         `yaml:"db"`
 	Paths      `yaml:"paths"`
+	External   `yaml:"external"`
 }
 
 type HTTPServer struct {
@@ -37,6 +38,11 @@ type Paths struct {
 	Refresh string `yaml:"refresh" env-required:"false"`
 	Edit    string `yaml:"edit" env-required:"false"`
 	Info    string `yaml:"info" env-required:"false"`
+	User    string `yaml:"user" env-required:"false"`
+}
+
+type External struct {
+	SSOUserInfo string `yanl:"sso_user_info" env-required:"false"`
 }
 
 func MustLoad(configPath string) *Config {
