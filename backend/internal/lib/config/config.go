@@ -17,6 +17,7 @@ type Config struct {
 	External      `yaml:"external"`
 	Payments      `yaml:"payments"`
 	Subscriptions `yaml:"subscriptions"`
+	OrderStatuses `yaml:"order_statuses"`
 }
 
 type HTTPServer struct {
@@ -36,13 +37,14 @@ type DB struct {
 }
 
 type Paths struct {
-	SignUp    string `yaml:"signup" env-required:"false"`
-	SignIn    string `yaml:"signin" env-required:"false"`
-	Refresh   string `yaml:"refresh" env-required:"false"`
-	Edit      string `yaml:"edit" env-required:"false"`
-	Info      string `yaml:"info" env-required:"false"`
-	User      string `yaml:"user" env-required:"false"`
-	Subscribe string `yaml:"subscribe" env-required:"false"`
+	SignUp    string `yaml:"signup" env-default:"/signup"`
+	SignIn    string `yaml:"signin" env-default:"/signin"`
+	Refresh   string `yaml:"refresh" env-default:"/refresh"`
+	Edit      string `yaml:"edit" env-default:"/user/edit"`
+	Info      string `yaml:"info" env-default:"/info"`
+	User      string `yaml:"user" env-default:"/user"`
+	Subscribe string `yaml:"subscribe" env-default:"/subscribe"`
+	Send      string `yaml:"send" env-default:"/send"`
 }
 
 type Redis struct {
@@ -62,6 +64,13 @@ type Payments struct {
 
 type Subscriptions struct {
 	Premium string `yaml:"premium" env-default:"premium"`
+}
+
+type OrderStatuses struct {
+	InQueue    string `yaml:"in_queue" env-default:"in queue"`
+	InProgress string `yaml:"in_progress" env-default:"in progress"`
+	Error      string `yaml:"error" env-default:"error"`
+	Success    string `yaml:"success" env-default:"success"`
 }
 
 func MustLoad(configPath string) *Config {

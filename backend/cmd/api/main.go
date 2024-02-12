@@ -30,6 +30,7 @@ func main() {
 	// Envs
 	cfgPath := os.Getenv("API_CONFIG_PATH")
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	inputPath := os.Getenv("FILES_INPUT_PATH")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -71,6 +72,7 @@ func main() {
 	// Static repos
 	subscriptionTypesRepository := repository.NewSubscriptionTypeRepository(pg)
 	paymentTypesRepository := repository.NewPaymentTypeRepository(pg)
+	orderStatusRepository := repository.NewOrderStatusRepository(pg)
 
 	// Static maps
 	subscriptionTypes, err := subscriptionTypesRepository.GetTypesMap()
@@ -83,12 +85,25 @@ func main() {
 		log.Error("failed to get paymeny types", sl.Err(err))
 		os.Exit(-1)
 	}
+	orderStatusesStrToInt, err := orderStatusRepository.GetStatusesMapStringToInt()
+	if err != nil {
+		log.Error("failed to get order statuses str to int", sl.Err(err))
+		os.Exit(-1)
+	}
+	orderStatusesIntToStr, err := orderStatusRepository.GetStatusesMapIntToString()
+	if err != nil {
+		log.Error("failed to get order statuses int to str", sl.Err(err))
+		os.Exit(-1)
+	}
 
 	// Dynamic repos
 	subscriptionRepository := repository.NewSubscriptionRepository(pg)
+	orderRepository := repository.NewOrderRepository(pg)
 
 	// Services
 	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg, subscriptionTypes, paymentTypes)
+	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
+		inputPath, cfg, client)
 
 	// Router
 	router := chi.NewRouter()
@@ -104,6 +119,7 @@ func main() {
 	// Router handlers
 	router.Post(cfg.Paths.Subscribe, api.Subscribe(log, cfg, subscriptionService))
 	router.Get(cfg.Paths.User, api.User(log, subscriptionService))
+	router.Post(cfg.Paths.Send, api.Send(log, orderService))
 
 	// Server
 	httpServer := http.Server{

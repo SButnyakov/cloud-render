@@ -18,7 +18,7 @@ func NewSubscriptionRepository(db *sql.DB) *SubscriptionRepository {
 }
 
 func (s *SubscriptionRepository) Create(subscription models.Subscription, payment models.Payment) error {
-	const fn = "postgres.repos.subscription.Create"
+	const fn = packagePath + "subscription.Create"
 
 	ctx := context.Background()
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -50,7 +50,7 @@ func (s *SubscriptionRepository) Create(subscription models.Subscription, paymen
 }
 
 func (s *SubscriptionRepository) Update(subscription models.Subscription, payment models.Payment) error {
-	const fn = "postgres.repos.subscription.Update"
+	const fn = packagePath + "subscription.Update"
 
 	ctx := context.Background()
 	tx, err := s.db.BeginTx(ctx, nil)
@@ -82,7 +82,7 @@ func (s *SubscriptionRepository) Update(subscription models.Subscription, paymen
 }
 
 func (s *SubscriptionRepository) GetExpireDate(uid int64) (*time.Time, error) {
-	const fn = "postgres.repos.subscription.GetExpireDate"
+	const fn = packagePath + "subscription.GetExpireDate"
 
 	stmt, err := s.db.Prepare("SELECT sub_expire_date FROM subscriptions WHERE user_id = $1")
 	if err != nil {
