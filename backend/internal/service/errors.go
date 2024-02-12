@@ -9,5 +9,8 @@ var (
 
 	ErrFailedToGetSubscription = errors.New("failed to get subscription")
 
+	ErrPaymentTypeNotFound      = errors.New("failed to get payment type")
+	ErrSubscriptionTypeNotFound = errors.New("failed to get subscription type")
+
 	ErrExternalError = errors.New("external error")
 )

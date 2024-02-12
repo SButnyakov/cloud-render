@@ -20,10 +20,6 @@ type SignUpRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
-type SignUpResponse struct {
-	resp.Response
-}
-
 type UserCreator interface {
 	CreateUser(dto.CreateUserDTO) error
 }

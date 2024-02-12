@@ -9,11 +9,13 @@ import (
 )
 
 type Config struct {
-	Env        string `env:"ENV" env-default:"local"`
-	HTTPServer `yaml:"http_server"`
-	DB         `yaml:"db"`
-	Paths      `yaml:"paths"`
-	External   `yaml:"external"`
+	Env           string `env:"ENV" env-default:"local"`
+	HTTPServer    `yaml:"http_server"`
+	DB            `yaml:"db"`
+	Paths         `yaml:"paths"`
+	External      `yaml:"external"`
+	Payments      `yaml:"payments"`
+	Subscriptions `yaml:"subscriptions"`
 }
 
 type HTTPServer struct {
@@ -33,16 +35,25 @@ type DB struct {
 }
 
 type Paths struct {
-	SignUp  string `yaml:"signup" env-required:"false"`
-	SignIn  string `yaml:"signin" env-required:"false"`
-	Refresh string `yaml:"refresh" env-required:"false"`
-	Edit    string `yaml:"edit" env-required:"false"`
-	Info    string `yaml:"info" env-required:"false"`
-	User    string `yaml:"user" env-required:"false"`
+	SignUp    string `yaml:"signup" env-required:"false"`
+	SignIn    string `yaml:"signin" env-required:"false"`
+	Refresh   string `yaml:"refresh" env-required:"false"`
+	Edit      string `yaml:"edit" env-required:"false"`
+	Info      string `yaml:"info" env-required:"false"`
+	User      string `yaml:"user" env-required:"false"`
+	Subscribe string `yaml:"subscribe" env-required:"false"`
 }
 
 type External struct {
 	SSOUserInfo string `yanl:"sso_user_info" env-required:"false"`
+}
+
+type Payments struct {
+	SubPremiumMonth string `yaml:"sub_premium_month" env-default:"sub-premium-month"`
+}
+
+type Subscriptions struct {
+	Premium string `yaml:"premium" env-default:"premium"`
 }
 
 func MustLoad(configPath string) *Config {

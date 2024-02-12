@@ -59,11 +59,27 @@ func main() {
 		os.Exit(-1)
 	}
 
-	// Repository
+	// Static repos
+	subscriptionTypesRepository := repository.NewSubscriptionTypeRepository(pg)
+	paymentTypesRepository := repository.NewPaymentTypeRepository(pg)
+
+	// Static maps
+	subscriptionTypes, err := subscriptionTypesRepository.GetTypesMap()
+	if err != nil {
+		log.Error("failed to get subscription types", sl.Err(err))
+		os.Exit(-1)
+	}
+	paymentTypes, err := paymentTypesRepository.GetTypesMap()
+	if err != nil {
+		log.Error("failed to get paymeny types", sl.Err(err))
+		os.Exit(-1)
+	}
+
+	// Dynamic repos
 	subscriptionRepository := repository.NewSubscriptionRepository(pg)
 
 	// Services
-	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg)
+	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg, subscriptionTypes, paymentTypes)
 
 	// Router
 	router := chi.NewRouter()
@@ -77,6 +93,7 @@ func main() {
 	router.Use(auth.New(log, jwtManager))
 
 	// Router handlers
+	router.Post(cfg.Paths.Subscribe, api.Subscribe(log, cfg, subscriptionService))
 	router.Get(cfg.Paths.User, api.User(log, subscriptionService))
 
 	// Server
