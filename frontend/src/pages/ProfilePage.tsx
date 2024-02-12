@@ -350,3 +350,4 @@ export default ProfilePage
 /* Add edit profile information logic */
 /* Add subscription logic */
 /* Http controls for order status page */
+/* Add modal page for delete order */
