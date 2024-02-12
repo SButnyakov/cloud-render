@@ -6,4 +6,8 @@ var (
 	ErrUserAlreadyExists  = errors.New("user already exsits")
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrUserNotFound       = errors.New("user not found")
+
+	ErrFailedToGetSubscription = errors.New("failed to get subscription")
+
+	ErrExternalError = errors.New("external error")
 )

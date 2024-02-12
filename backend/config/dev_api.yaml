@@ -11,3 +11,7 @@ db:
   host: "postgres"
   port: "5432"
   migrations_path: "file://../../../migrations/api/postgres"
+paths:
+  user: "/user"
+external:
+  sso_user_info: "http://sso:8001/info/%d"

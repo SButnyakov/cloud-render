@@ -20,7 +20,7 @@ type SignUpRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
-type Response struct {
+type SignUpResponse struct {
 	resp.Response
 }
 

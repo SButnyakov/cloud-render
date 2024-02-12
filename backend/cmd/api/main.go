@@ -2,12 +2,15 @@ package main
 
 import (
 	"cloud-render/internal/db/postgres"
+	"cloud-render/internal/http/api"
 	"cloud-render/internal/http/middleware/auth"
 	"cloud-render/internal/http/middleware/cors"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
 	"cloud-render/internal/lib/tokenManager"
+	"cloud-render/internal/repository"
+	"cloud-render/internal/service"
 	"context"
 	"errors"
 	"fmt"
@@ -56,6 +59,12 @@ func main() {
 		os.Exit(-1)
 	}
 
+	// Repository
+	subscriptionRepository := repository.NewSubscriptionRepository(pg)
+
+	// Services
+	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg)
+
 	// Router
 	router := chi.NewRouter()
 
@@ -66,6 +75,9 @@ func main() {
 	router.Use(middleware.URLFormat)
 	router.Use(cors.New())
 	router.Use(auth.New(log, jwtManager))
+
+	// Router handlers
+	router.Get(cfg.Paths.User, api.User(log, subscriptionService))
 
 	// Server
 	httpServer := http.Server{
