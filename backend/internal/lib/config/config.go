@@ -12,6 +12,7 @@ type Config struct {
 	Env           string `env:"ENV" env-default:"local"`
 	HTTPServer    `yaml:"http_server"`
 	DB            `yaml:"db"`
+	Redis         `yaml:"redis"`
 	Paths         `yaml:"paths"`
 	External      `yaml:"external"`
 	Payments      `yaml:"payments"`
@@ -42,6 +43,13 @@ type Paths struct {
 	Info      string `yaml:"info" env-required:"false"`
 	User      string `yaml:"user" env-required:"false"`
 	Subscribe string `yaml:"subscribe" env-required:"false"`
+}
+
+type Redis struct {
+	Address           string `yaml:"address" env-default:"localhost:6379"`
+	QueueName         string `yaml:"queue_name" env-default:"render-list"`
+	PriorityQueueName string `yaml:"priority_queue_name" env-default:"render-list"`
+	Password          string `yaml:"password" env-default:"password"`
 }
 
 type External struct {

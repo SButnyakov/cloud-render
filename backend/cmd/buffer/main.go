@@ -2,6 +2,7 @@ package main
 
 import (
 	"cloud-render/internal/db/postgres"
+	"cloud-render/internal/db/redis"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
@@ -41,6 +42,14 @@ func main() {
 		os.Exit(-1)
 	}
 	defer pg.Close()
+
+	// Redis
+	client, err := redis.New(cfg)
+	if err != nil {
+		log.Error("failed to initialize redis", sl.Err(err))
+		os.Exit(-1)
+	}
+	defer client.Close()
 
 	// JWT manager
 	jwtManager, err := tokenManager.New(jwtSecretKey)

@@ -2,6 +2,7 @@ package main
 
 import (
 	"cloud-render/internal/db/postgres"
+	"cloud-render/internal/db/redis"
 	"cloud-render/internal/http/api"
 	"cloud-render/internal/http/middleware/auth"
 	"cloud-render/internal/http/middleware/cors"
@@ -46,6 +47,14 @@ func main() {
 		os.Exit(-1)
 	}
 	defer pg.Close()
+
+	// Redis
+	client, err := redis.New(cfg)
+	if err != nil {
+		log.Error("failed to initialize redis", sl.Err(err))
+		os.Exit(-1)
+	}
+	defer client.Close()
 
 	// Migrating
 	if cfg.Env == "dev" || cfg.Env == "prod" {
