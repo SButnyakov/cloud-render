@@ -349,3 +349,4 @@ export default ProfilePage
 /* Add profile block */
 /* Add edit profile information logic */
 /* Add subscription logic */
+/* Http controls for order status page */
