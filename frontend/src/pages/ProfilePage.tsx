@@ -345,3 +345,4 @@ const ProfilePage = observer(() => {
 export default ProfilePage
 
 /* Create orders table */
+/* Add order actions */
