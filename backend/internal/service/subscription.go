@@ -4,22 +4,35 @@ import (
 	"cloud-render/internal/dto"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/external"
+	"cloud-render/internal/models"
+	"cloud-render/internal/repository"
+	"errors"
 	"time"
 )
 
 type SubscriptionService struct {
 	subscriptionProvider SubscriptionProvider
 	config               *config.Config
+	subMap               SubscriptionsMap
+	payMap               PaymentsMap
 }
 
 type SubscriptionProvider interface {
 	GetExpireDate(uid int64) (*time.Time, error)
+	Create(subscription models.Subscription, payment models.Payment) error
+	Update(subscription models.Subscription, payment models.Payment) error
 }
 
-func NewSubscriptionService(subscriptionProvider SubscriptionProvider, config *config.Config) *SubscriptionService {
+type SubscriptionsMap map[string]int64
+type PaymentsMap map[string]int64
+
+func NewSubscriptionService(subscriptionProvider SubscriptionProvider, config *config.Config,
+	subMap SubscriptionsMap, payMap PaymentsMap) *SubscriptionService {
 	return &SubscriptionService{
 		subscriptionProvider: subscriptionProvider,
 		config:               config,
+		subMap:               subMap,
+		payMap:               payMap,
 	}
 }
 
@@ -63,4 +76,52 @@ func (s *SubscriptionService) asyncGetUserInfo(out chan<- *dto.GetUserDTO, url s
 		return
 	}
 	out <- userDTO
+}
+
+func (s *SubscriptionService) SubscribeUser(id int64) error {
+	pTypeId, ok := s.payMap[s.config.Payments.SubPremiumMonth]
+	if !ok {
+		return ErrPaymentTypeNotFound
+	}
+
+	sTypeId, ok := s.subMap[s.config.Subscriptions.Premium]
+	if !ok {
+		return ErrSubscriptionTypeNotFound
+	}
+
+	expireDate, err := s.subscriptionProvider.GetExpireDate(id)
+	if !errors.Is(err, repository.ErrSubscriptionNotFound) {
+		return err
+	}
+
+	if expireDate == nil {
+		return s.createSubscription(id, pTypeId, sTypeId)
+	} else {
+		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)
+	}
+
+}
+
+func (s *SubscriptionService) createSubscription(id, pType, sType int64) error {
+	return s.subscriptionProvider.Create(models.Subscription{
+		UserId:     id,
+		TypeId:     sType,
+		ExpireDate: time.Now().AddDate(0, 1, 0),
+	}, models.Payment{
+		UserID:   id,
+		TypeId:   pType,
+		DateTime: time.Now(),
+	})
+}
+
+func (s *SubscriptionService) updateSubscription(id, pType, sType int64, expDate *time.Time) error {
+	return s.subscriptionProvider.Update(models.Subscription{
+		UserId:     id,
+		TypeId:     sType,
+		ExpireDate: expDate.AddDate(0, 1, 0),
+	}, models.Payment{
+		UserID:   id,
+		TypeId:   pType,
+		DateTime: time.Now(),
+	})
 }

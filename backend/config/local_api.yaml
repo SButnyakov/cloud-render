@@ -13,5 +13,10 @@ db:
   migrations_path: "file://../../../migrations/api/postgres"
 paths:
   user: "/user"
+  subscribe: "/susbcribe"
 external:
   sso_user_info: "http://localhost:8001/info/%d"
+payments:
+  sub_premium_month: "sub-premium-month"
+subscriptions:
+  premium: "premium"
