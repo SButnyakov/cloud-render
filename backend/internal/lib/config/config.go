@@ -33,7 +33,7 @@ type DB struct {
 	Password       string `yaml:"password" env-default:"password"`
 	Host           string `yaml:"host" env-default:"postgres"`
 	Port           string `yaml:"port" env-default:"5432"`
-	MigrationsPath string `yaml:"migrations_path", env-required:"true"`
+	MigrationsPath string `yaml:"migrations_path", env-required:"false"`
 }
 
 type Paths struct {
@@ -50,7 +50,7 @@ type Paths struct {
 
 type Orders struct {
 	Root  string `yaml:"root" env-default:"/orders"`
-	Order string `yaml:"order" env-default:"/{id}`
+	Order string `yaml:"order" env-default:"/{id}"`
 }
 
 type Redis struct {
