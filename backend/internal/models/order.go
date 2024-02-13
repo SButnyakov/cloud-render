@@ -13,4 +13,5 @@ type Order struct {
 	UserId       int64
 	StatusId     int64
 	DownloadLink sql.NullString
+	IsDeleted    bool
 }
