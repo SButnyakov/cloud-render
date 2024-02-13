@@ -32,6 +32,7 @@ type OrderService struct {
 type OrderProvider interface {
 	Create(order models.Order) error
 	GetOne(id int64) (*models.Order, error)
+	GetMany(id int64) ([]models.Order, error)
 	SoftDelete(id int64) error
 }
 
@@ -115,6 +116,29 @@ func (s *OrderService) GetOneOrder(id int64) (*dto.GetOrderDTO, error) {
 		OrderStatus:  s.statusesIntToStr[order.StatusId],
 		DownloadLink: converters.NullStringToString(order.DownloadLink),
 	}, nil
+}
+
+func (s *OrderService) GetManyOrders(id int64) ([]dto.GetOrderDTO, error) {
+	orders, err := s.orderProvider.GetMany(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoOrdersFound) {
+			return []dto.GetOrderDTO{}, nil
+		}
+		return nil, err
+	}
+
+	ordersDTO := make([]dto.GetOrderDTO, len(orders))
+	for i, v := range orders {
+		ordersDTO[i] = dto.GetOrderDTO{
+			Id:           v.Id,
+			Filename:     v.FileName,
+			Date:         v.CreationDate,
+			OrderStatus:  s.statusesIntToStr[v.StatusId],
+			DownloadLink: converters.NullStringToString(v.DownloadLink),
+		}
+	}
+
+	return ordersDTO, nil
 }
 
 func (s *OrderService) SoftDeleteOneOrder(id int64) error {

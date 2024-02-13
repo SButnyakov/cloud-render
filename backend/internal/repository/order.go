@@ -52,6 +52,37 @@ func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
 	return &order, nil
 }
 
+func (o *OrderRepository) GetMany(id int64) ([]models.Order, error) {
+	const fn = "postgres.repos.orders.Orders"
+
+	stmt, err := o.db.Prepare("SELECT id, fileName, storingName, creation_date, status_id, user_id, download_link FROM orders WHERE is_deleted = FALSE AND user_id = $1")
+	if err != nil {
+		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	rows, err := stmt.Query(id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoOrdersFound
+		}
+		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+	defer rows.Close()
+
+	orders := make([]models.Order, 0)
+
+	for rows.Next() {
+		order := models.Order{}
+		err = rows.Scan(&order.Id, &order.FileName, &order.StoringName, &order.CreationDate, &order.StatusId, &order.UserId, &order.DownloadLink)
+		if err != nil {
+			return nil, fmt.Errorf("%s: scanning rows: %w", fn, err)
+		}
+		orders = append(orders, order)
+	}
+
+	return orders, nil
+}
+
 func (o *OrderRepository) SoftDelete(id int64) error {
 	const fn = packagePath + "order.SoftDelete"
 

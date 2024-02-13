@@ -50,6 +50,7 @@ type Paths struct {
 
 type Orders struct {
 	Root      string `yaml:"root" env-default:"/orders"`
+	Orders    string `yaml:"orders" env-default:"/"`
 	Order     string `yaml:"order" env-default:"/{id}"`
 	DeleteOne string `yaml:"delete_one" env-default:"/{id}/delete"`
 }

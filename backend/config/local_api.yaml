@@ -22,7 +22,9 @@ paths:
   send: "/send"
   orders:
     root: "/orders"
+    orders: "/"
     order: "/{id}"
+    
     delete_one: "/{id}/delete"
 external:
   sso_user_info: "http://localhost:8001/info/%d"
