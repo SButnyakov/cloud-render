@@ -32,6 +32,7 @@ type OrderService struct {
 type OrderProvider interface {
 	Create(order models.Order) error
 	GetOne(id int64) (*models.Order, error)
+	SoftDelete(id int64) error
 }
 
 type OrderStatusesMapStringToInt map[string]int64
@@ -114,4 +115,15 @@ func (s *OrderService) GetOneOrder(id int64) (*dto.GetOrderDTO, error) {
 		OrderStatus:  s.statusesIntToStr[order.StatusId],
 		DownloadLink: converters.NullStringToString(order.DownloadLink),
 	}, nil
+}
+
+func (s *OrderService) SoftDeleteOneOrder(id int64) error {
+	err := s.orderProvider.SoftDelete(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoOrdersFound) {
+			return ErrOrderNotFound
+		}
+		return err
+	}
+	return nil
 }

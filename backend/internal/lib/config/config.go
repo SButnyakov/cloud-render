@@ -49,8 +49,9 @@ type Paths struct {
 }
 
 type Orders struct {
-	Root  string `yaml:"root" env-default:"/orders"`
-	Order string `yaml:"order" env-default:"/{id}"`
+	Root      string `yaml:"root" env-default:"/orders"`
+	Order     string `yaml:"order" env-default:"/{id}"`
+	DeleteOne string `yaml:"delete_one" env-default:"/{id}/delete"`
 }
 
 type Redis struct {

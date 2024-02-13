@@ -16,7 +16,7 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 }
 
 func (o *OrderRepository) Create(order models.Order) error {
-	const fn = packagePath + "orders.Create"
+	const fn = packagePath + "order.Create"
 
 	stmt, err := o.db.Prepare("INSERT INTO orders (filename, storingname, creation_date, user_id, status_id, is_deleted) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
@@ -32,7 +32,7 @@ func (o *OrderRepository) Create(order models.Order) error {
 }
 
 func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
-	const fn = "postgres.repos.orders.Order"
+	const fn = packagePath + "order.GetOne"
 
 	stmt, err := o.db.Prepare("SELECT id, fileName, storingName, creation_date, status_id, user_id, download_link FROM orders WHERE is_deleted = FALSE AND id = $1")
 	if err != nil {
@@ -50,4 +50,24 @@ func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
 	}
 
 	return &order, nil
+}
+
+func (o *OrderRepository) SoftDelete(id int64) error {
+	const fn = packagePath + "order.SoftDelete"
+
+	stmt, err := o.db.Prepare("UPDATE orders SET is_deleted=TRUE WHERE id=$1")
+	if err != nil {
+		return fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	res, err := stmt.Exec(id)
+	if err != nil {
+		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return ErrNoOrdersFound
+	}
+
+	return nil
 }
