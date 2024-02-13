@@ -1,27 +1,18 @@
-FROM golang:1.21.5-bullseye
-#ENV CONFIG_PATH=config/
-ENV PGDATA=/postgres-storage
-ENV API_CONFIG_PATH=/backend-api/config/localapi.yaml
+FROM golang:1.22.0-bullseye
+#ENV PGDATA=/postgres-storage
+ENV API_CONFIG_PATH=/backend/config/dev_api.yaml
 ENV API_STORAGE_PATH="user=user password=password dbname=cloud_render_api sslmode=disable"
-ENV BUFFER_CONFIG_PATH=/backend-api/config/localbuffer.yaml
-ENV FILES_INPUT_PATH=/backend-api/files/input
-ENV FILES_OUTPUT_PATH=/backend-api/files/output
+ENV BUFFER_CONFIG_PATH=/backend/config/dev_api.yaml
+ENV FILES_INPUT_PATH=/backend/files/input
+ENV FILES_OUTPUT_PATH=/backend/files/output
 ENV JWT_SECRET_KEY=randomkekv123
-WORKDIR /backend-api
+WORKDIR /backend
 COPY . .
 RUN go mod download && go mod verify
 RUN go mod tidy
 RUN go build -C ./cmd/api -o ./../serverAPI
 RUN go build -C ./cmd/buffer -o ./../serverBuff
-#RUN wget https://download.redis.io/redis-stable.tar.gz
-#RUN tar -xzvf redis-stable.tar.gz
-#WORKDIR /backend-api/redis-stable
-#RUN make
-#WORKDIR /backend-api/redis-stable/src
-#RUN cp ./redis-server /backend-api/cmd/
-WORKDIR /backend-api/cmd/
+WORKDIR /backend/cmd/
 RUN chmod +x ./startAll.sh
-#, "&&", "./serverBuff", "&&", "./redis-server"]
-#CMD ["./serverAPI", "&&", "./serverAuth"]
 CMD ./startAll.sh
 
