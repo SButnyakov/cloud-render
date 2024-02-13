@@ -3,6 +3,7 @@ package repository
 import (
 	"cloud-render/internal/models"
 	"database/sql"
+	"errors"
 	"fmt"
 )
 
@@ -28,4 +29,25 @@ func (o *OrderRepository) Create(order models.Order) error {
 	}
 
 	return nil
+}
+
+func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
+	const fn = "postgres.repos.orders.Order"
+
+	stmt, err := o.db.Prepare("SELECT id, fileName, storingName, creation_date, status_id, user_id, download_link FROM orders WHERE is_deleted = FALSE AND id = $1")
+	if err != nil {
+		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+
+	var order models.Order
+
+	err = stmt.QueryRow(id).Scan(&order.Id, &order.FileName, &order.StoringName, &order.CreationDate, &order.StatusId, &order.UserId, &order.DownloadLink)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNoOrdersFound
+		}
+		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return &order, nil
 }

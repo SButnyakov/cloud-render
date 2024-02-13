@@ -3,9 +3,12 @@ package service
 import (
 	"cloud-render/internal/dto"
 	"cloud-render/internal/lib/config"
+	"cloud-render/internal/lib/converters"
 	"cloud-render/internal/models"
+	"cloud-render/internal/repository"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -28,6 +31,7 @@ type OrderService struct {
 
 type OrderProvider interface {
 	Create(order models.Order) error
+	GetOne(id int64) (*models.Order, error)
 }
 
 type OrderStatusesMapStringToInt map[string]int64
@@ -92,4 +96,22 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 	s.redis.RPush(context.Background(), s.cfg.Redis.QueueName, string(b))
 
 	return nil
+}
+
+func (s *OrderService) GetOneOrder(id int64) (*dto.GetOrderDTO, error) {
+	order, err := s.orderProvider.GetOne(id)
+	if err != nil {
+		if errors.Is(err, repository.ErrNoOrdersFound) {
+			return nil, ErrOrderNotFound
+		}
+		return nil, err
+	}
+
+	return &dto.GetOrderDTO{
+		Id:           order.Id,
+		Filename:     order.FileName,
+		Date:         order.CreationDate,
+		OrderStatus:  s.statusesIntToStr[order.StatusId],
+		DownloadLink: converters.NullStringToString(order.DownloadLink),
+	}, nil
 }

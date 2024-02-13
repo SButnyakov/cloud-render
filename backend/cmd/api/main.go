@@ -121,6 +121,10 @@ func main() {
 	router.Get(cfg.Paths.User, api.User(log, subscriptionService))
 	router.Post(cfg.Paths.Send, api.Send(log, orderService))
 
+	router.Route(cfg.Paths.Orders.Root, func(ordersRouter chi.Router) {
+		ordersRouter.Get(cfg.Paths.Orders.Order, api.Order(log, orderService))
+	})
+
 	// Server
 	httpServer := http.Server{
 		Addr:         fmt.Sprintf("%s:%d", cfg.HTTPServer.Host, cfg.HTTPServer.Port),
