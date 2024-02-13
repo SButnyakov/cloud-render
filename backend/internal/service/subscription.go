@@ -99,7 +99,6 @@ func (s *SubscriptionService) SubscribeUser(id int64) error {
 	} else {
 		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)
 	}
-
 }
 
 func (s *SubscriptionService) createSubscription(id, pType, sType int64) error {

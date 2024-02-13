@@ -7,15 +7,15 @@ import (
 	"fmt"
 )
 
-type OrderStatusesRepository struct {
+type OrderStatusRepository struct {
 	db *sql.DB
 }
 
-func NewOrderStatusesRepository(db *sql.DB) *OrderStatusesRepository {
-	return &OrderStatusesRepository{db: db}
+func NewOrderStatusRepository(db *sql.DB) *OrderStatusRepository {
+	return &OrderStatusRepository{db: db}
 }
 
-func (os *OrderStatusesRepository) GetStatusesMapStringToInt() (map[string]int64, error) {
+func (os *OrderStatusRepository) GetStatusesMapStringToInt() (map[string]int64, error) {
 	const fn = packagePath + "order_statuses.GetStatusesMapStringToInt"
 
 	stmt, err := os.db.Prepare("SELECT id, name FROM order_statuses")
@@ -46,7 +46,7 @@ func (os *OrderStatusesRepository) GetStatusesMapStringToInt() (map[string]int64
 	return statuses, nil
 }
 
-func (os *OrderStatusesRepository) GetStatusesMapIntToString() (map[int64]string, error) {
+func (os *OrderStatusRepository) GetStatusesMapIntToString() (map[int64]string, error) {
 	const fn = packagePath + "order_statuses.GetStatusesMapIntToString"
 
 	stmt, err := os.db.Prepare("SELECT id, name FROM order_statuses")

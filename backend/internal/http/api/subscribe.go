@@ -10,10 +10,6 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
-type SubscribeResponse struct {
-	resp.Response
-}
-
 type UserSubscriber interface {
 	SubscribeUser(int64) error
 }

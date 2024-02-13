@@ -15,7 +15,7 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 }
 
 func (o *OrderRepository) Create(order models.Order) error {
-	const fn = packagePath + ".orders.Create"
+	const fn = packagePath + "orders.Create"
 
 	stmt, err := o.db.Prepare("INSERT INTO orders (filename, storingname, creation_date, user_id, status_id, is_deleted) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {

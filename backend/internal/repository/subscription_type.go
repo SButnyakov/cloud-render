@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"cloud-render/internal/models"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -15,7 +16,7 @@ func NewSubscriptionTypeRepository(db *sql.DB) *SubscriptionTypeRepository {
 }
 
 func (st *SubscriptionTypeRepository) GetTypesMap() (map[string]int64, error) {
-	const fn = "postgres.repos.subscription_types.GetTypesMap"
+	const fn = packagePath + "subscription_types.GetTypesMap"
 
 	stmt, err := st.db.Prepare("SELECT id, name FROM subscription_types")
 	if err != nil {
@@ -25,7 +26,7 @@ func (st *SubscriptionTypeRepository) GetTypesMap() (map[string]int64, error) {
 	rows, err := stmt.Query()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, storage.ErrNoSubscriptionTypes)
+			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrNoSubscriptionTypes)
 		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}

@@ -7,10 +7,7 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-type External struct {
-}
-
-func (e External) get(url string, v any) error {
+func get(url string, v any) error {
 	res, err := http.Get(url)
 	if err != nil {
 		return err

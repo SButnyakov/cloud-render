@@ -55,7 +55,7 @@ type Redis struct {
 }
 
 type External struct {
-	SSOUserInfo string `yanl:"sso_user_info" env-required:"false"`
+	SSOUserInfo string `yaml:"sso_user_info"`
 }
 
 type Payments struct {
