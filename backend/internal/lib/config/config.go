@@ -46,6 +46,7 @@ type Paths struct {
 	Subscribe string `yaml:"subscribe" env-default:"/subscribe"`
 	Send      string `yaml:"send" env-default:"/send"`
 	Orders    Orders `yaml:"orders"`
+	Request   string `yaml:"request" env-default:"/request"`
 }
 
 type Orders struct {

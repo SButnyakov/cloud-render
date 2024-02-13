@@ -15,6 +15,8 @@ redis:
   password: "password"
   queue_name: "render-list"
   priority_queue_name: "subscribed-render-list"
+paths:
+  request: "/request"
 order_statuses:
   in_queue: "in queue"
   in_progress: "in progress"

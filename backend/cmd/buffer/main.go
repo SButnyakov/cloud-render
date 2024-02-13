@@ -3,6 +3,7 @@ package main
 import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/db/redis"
+	"cloud-render/internal/http/buffer"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
@@ -67,6 +68,9 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
+
+	// Router handlers
+	router.Get(cfg.Paths.Request, buffer.Request(log, client, cfg))
 
 	// Server
 	httpServer := http.Server{
