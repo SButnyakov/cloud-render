@@ -122,6 +122,7 @@ func main() {
 	router.Post(cfg.Paths.Send, api.Send(log, orderService))
 
 	router.Route(cfg.Paths.Orders.Root, func(ordersRouter chi.Router) {
+		ordersRouter.Get(cfg.Paths.Orders.Orders, api.Orders(log, orderService))
 		ordersRouter.Get(cfg.Paths.Orders.Order, api.Order(log, orderService))
 		ordersRouter.Post(cfg.Paths.Orders.DeleteOne, api.DeleteOrder(log, orderService))
 	})

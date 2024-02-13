@@ -22,6 +22,7 @@ paths:
   send: "/send"
   orders:
     root: "/orders"
+    orders: "/"
     order: "/{id}"
     delete_one: "/{id}/delete"
 external:
