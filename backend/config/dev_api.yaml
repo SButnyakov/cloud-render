@@ -20,6 +20,9 @@ paths:
   user: "/user"
   subscribe: "/susbcribe"
   send: "/send"
+  orders:
+    root: "/orders"
+    order: "/{id}"
 external:
   sso_user_info: "http://sso:8001/info/%d"
 payments:

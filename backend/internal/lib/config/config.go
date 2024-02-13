@@ -45,6 +45,12 @@ type Paths struct {
 	User      string `yaml:"user" env-default:"/user"`
 	Subscribe string `yaml:"subscribe" env-default:"/subscribe"`
 	Send      string `yaml:"send" env-default:"/send"`
+	Orders    Orders `yaml:"orders"`
+}
+
+type Orders struct {
+	Root  string `yaml:"root" env-default:"/orders"`
+	Order string `yaml:"order" env-default:"/{id}`
 }
 
 type Redis struct {

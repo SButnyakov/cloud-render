@@ -7,6 +7,8 @@ var (
 	ErrInvalidCredentials = errors.New("invalid credentials")
 	ErrUserNotFound       = errors.New("user not found")
 
+	ErrOrderNotFound = errors.New("order not found")
+
 	ErrFailedToGetSubscription = errors.New("failed to get subscription")
 
 	ErrPaymentTypeNotFound      = errors.New("failed to get payment type")

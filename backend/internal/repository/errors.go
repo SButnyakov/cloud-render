@@ -10,6 +10,8 @@ var (
 	ErrUserExists   = errors.New("user already exists")
 	ErrUserNotFound = errors.New("invalid credentials")
 
+	ErrNoOrdersFound = errors.New("no orders found")
+
 	ErrSubscriptionNotFound = errors.New("subscription not found")
 
 	ErrNoSubscriptionTypes = errors.New("no subscription types found")
