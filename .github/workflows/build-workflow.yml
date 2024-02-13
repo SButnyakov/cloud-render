@@ -1,0 +1,55 @@
+name: project build workflow
+on: [push, workflow_dispatch]
+jobs:
+  backend-build:
+    runs-on: self-hosted
+    steps:
+      - name: pull req
+        uses: actions/checkout@v4
+      - name: installing go
+        working-directory: ./backend
+        run: go mod download 1> /dev/null && go mod verify 1> /dev/null
+      - name: uploading dependencies
+        working-directory: ./backend
+        run: go mod tidy 1> /dev/null
+      - name: building serverAPI
+        if: always()
+        working-directory: ./backend
+        run: go build -C ./cmd/api -o ./../serverAPI 1> /dev/null
+        timeout-minutes: 5
+      - name: building serverAuth
+        if: always()
+        working-directory: ./backend
+        run: go build -C ./cmd/auth -o ./../serverAuth 1> /dev/null
+        timeout-minutes: 5
+      - name: building buffer
+        if: always()
+        working-directory: ./backend
+        run: go build -C ./cmd/buffer -o ./../serverBuff 1> /dev/null
+        timeout-minutes: 5
+  frontend-build:
+    runs-on: self-hosted
+    steps:
+      - name: pull req
+        uses: actions/checkout@v4
+      - name: installing local dependencies
+        working-directory: ./frontend
+        run: npm ci 1> /dev/null
+        timeout-minutes: 10
+      - name: prepare script for modification
+        run: chmod +x ./CI-change.sh
+      - name: set CI to false and disable eslint to suppress warnings
+        run: ./CI-change.sh
+      - name: building node.js
+        working-directory: ./frontend
+        run: npm run build
+        timeout-minutes: 10
+  docker-build:
+    runs-on: self-hosted
+    needs: [node_js-build,go-build]
+    steps:
+      - name: pull req
+        uses: actions/checkout@v4
+      - name: building docker containers
+        run: docker-compose build
+        timeout-minutes: 30
