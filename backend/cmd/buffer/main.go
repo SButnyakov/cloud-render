@@ -29,6 +29,7 @@ func main() {
 	cfgPath := os.Getenv("BUFFER_CONFIG_PATH")
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	inputPath := os.Getenv("FILES_INPUT_PATH")
+	outputPath := os.Getenv("FILES_OUTPUT_PATH")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -83,7 +84,7 @@ func main() {
 
 	// Services
 	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
-		inputPath, cfg, client)
+		inputPath, outputPath, cfg, client)
 
 	// Router
 	router := chi.NewRouter()
@@ -100,7 +101,9 @@ func main() {
 		uidRouter.Route(cfg.Paths.UID.Blend.Root, func(blendRouter chi.Router) {
 			blendRouter.Put(cfg.Paths.UID.Blend.Update, buffer.Update(log, orderService))
 		})
-
+		uidRouter.Route(cfg.Paths.UID.Image.Root, func(imageRouter chi.Router) {
+			imageRouter.Post(cfg.Paths.UID.Image.Root, buffer.Upload(log, orderService))
+		})
 	})
 
 	// Server

@@ -25,6 +25,7 @@ type OrderService struct {
 	statusesStrToInt OrderStatusesMapStringToInt
 	statusesIntToStr OrderStatusesMapIntToString
 	inputPath        string
+	outputPath       string
 	cfg              *config.Config
 	redis            *redis.Client
 }
@@ -34,6 +35,7 @@ type OrderProvider interface {
 	GetOne(id int64) (*models.Order, error)
 	GetMany(id int64) ([]models.Order, error)
 	UpdateStatus(storingName string, uid, statusId int64) error
+	UpdateDownloadLink(id int64, storingName, downloadLink string) error
 	SoftDelete(id int64) error
 }
 
@@ -41,13 +43,14 @@ type OrderStatusesMapStringToInt map[string]int64
 type OrderStatusesMapIntToString map[int64]string
 
 func NewOrderService(orderProvider OrderProvider, statusesStrToInt OrderStatusesMapStringToInt,
-	statusesIntToStr OrderStatusesMapIntToString, inputPath string, cfg *config.Config,
+	statusesIntToStr OrderStatusesMapIntToString, inputPath, outputPath string, cfg *config.Config,
 	redis *redis.Client) *OrderService {
 	return &OrderService{
 		orderProvider:    orderProvider,
 		statusesStrToInt: statusesStrToInt,
 		statusesIntToStr: statusesIntToStr,
 		inputPath:        inputPath,
+		outputPath:       outputPath,
 		cfg:              cfg,
 		redis:            redis,
 	}
@@ -97,6 +100,51 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 	}
 
 	s.redis.RPush(context.Background(), s.cfg.Redis.QueueName, string(b))
+
+	return nil
+}
+
+func (s *OrderService) UpdateOrderImage(dto dto.UpdateOrderImageDTO) error {
+	userPath := filepath.Join(s.outputPath, dto.UserId)
+	if err := os.MkdirAll(userPath, os.ModePerm); err != nil {
+		return err
+	}
+
+	savePath := filepath.Join(userPath, dto.Header.Filename)
+
+	f, err := os.OpenFile(savePath, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = io.Copy(f, dto.File)
+	if err != nil {
+		os.Remove(savePath)
+		return err
+	}
+
+	id, err := strconv.ParseInt(dto.UserId, 10, 64)
+	if err != nil {
+		return err
+	}
+
+	err = s.orderProvider.UpdateStatus(strings.Split(dto.Header.Filename, ".")[0], int64(id), s.statusesStrToInt[s.cfg.OrderStatuses.Success])
+	if err != nil {
+		return err
+	}
+
+	downloadLink := fmt.Sprintf("http://%s:%d/%s/images/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
+
+	err = s.orderProvider.UpdateDownloadLink(int64(id), strings.Split(dto.Header.Filename, ".")[0], downloadLink)
+	if err != nil {
+		return err
+	}
+
+	err = os.Remove(filepath.Join(s.inputPath, dto.UserId, strings.Split(dto.Header.Filename, ".")[0]))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -26,3 +26,9 @@ type UpdateOrderStatusDTO struct {
 	StoringName string
 	Status      string
 }
+
+type UpdateOrderImageDTO struct {
+	UserId string
+	File   multipart.File
+	Header *multipart.FileHeader
+}
