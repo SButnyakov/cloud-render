@@ -31,6 +31,7 @@ func main() {
 	cfgPath := os.Getenv("API_CONFIG_PATH")
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	inputPath := os.Getenv("FILES_INPUT_PATH")
+	outputPath := os.Getenv("FILES_OUTPUT_PATH")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -103,7 +104,7 @@ func main() {
 	// Services
 	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg, subscriptionTypes, paymentTypes)
 	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
-		inputPath, cfg, client)
+		inputPath, outputPath, cfg, client)
 
 	// Router
 	router := chi.NewRouter()

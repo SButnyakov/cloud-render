@@ -22,6 +22,9 @@ paths:
     blend:
       root: "/blend"
       update: "/update/{filename}/{status}"
+    image:
+      root: "/image"
+      upload: "/upload"
 order_statuses:
   in_queue: "in queue"
   in_progress: "in progress"

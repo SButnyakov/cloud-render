@@ -60,11 +60,17 @@ type Orders struct {
 type UID struct {
 	Root  string `yaml:"root" env-default:"/{uid}"`
 	Blend Blend  `yaml:"blend"`
+	Image Image  `yaml:"image"`
 }
 
 type Blend struct {
 	Root   string `yaml:"root" env-default:"/blend"`
 	Update string `yaml:"/update/{filename}/{status}"`
+}
+
+type Image struct {
+	Root   string `yaml:"root" env-default:"/image"`
+	Upload string `yaml:"upload" env-default:"/upload"`
 }
 
 type Redis struct {
