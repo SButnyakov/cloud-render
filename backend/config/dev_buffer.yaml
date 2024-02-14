@@ -17,6 +17,7 @@ redis:
   priority_queue_name: "subscribed-render-list"
 paths:
   request: "/request"
+  download: "/download/{filename}"
   uid:
     root: "/{uid}"
     blend:

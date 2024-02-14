@@ -4,6 +4,7 @@ import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/db/redis"
 	"cloud-render/internal/http/buffer"
+	"cloud-render/internal/http/middleware/auth"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
@@ -62,7 +63,6 @@ func main() {
 		log.Error("failed to initialize jwt token manager", sl.Err(err))
 		os.Exit(-1)
 	}
-	_ = jwtManager
 
 	// Static repos
 	orderStatusRepository := repository.NewOrderStatusRepository(pg)
@@ -99,10 +99,15 @@ func main() {
 	router.Get(cfg.Paths.Request, buffer.Request(log, client, cfg))
 	router.Route(cfg.Paths.UID.Root, func(uidRouter chi.Router) {
 		uidRouter.Route(cfg.Paths.UID.Blend.Root, func(blendRouter chi.Router) {
+			blendRouter.Get(cfg.Paths.UID.Download, buffer.Download(log, inputPath))
 			blendRouter.Put(cfg.Paths.UID.Blend.Update, buffer.Update(log, orderService))
 		})
 		uidRouter.Route(cfg.Paths.UID.Image.Root, func(imageRouter chi.Router) {
 			imageRouter.Post(cfg.Paths.UID.Image.Root, buffer.Upload(log, orderService))
+			imageRouter.Route("/", func(authImageRouter chi.Router) {
+				authImageRouter.Use(auth.New(log, jwtManager))
+				authImageRouter.Get(cfg.Paths.UID.Download, buffer.Download(log, outputPath))
+			})
 		})
 	})
 

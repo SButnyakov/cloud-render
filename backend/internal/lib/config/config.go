@@ -58,9 +58,10 @@ type Orders struct {
 }
 
 type UID struct {
-	Root  string `yaml:"root" env-default:"/{uid}"`
-	Blend Blend  `yaml:"blend"`
-	Image Image  `yaml:"image"`
+	Root     string `yaml:"root" env-default:"/{uid}"`
+	Download string `yaml:"download" env-default:"/download/{filename}"`
+	Blend    Blend  `yaml:"blend"`
+	Image    Image  `yaml:"image"`
 }
 
 type Blend struct {

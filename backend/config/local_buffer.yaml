@@ -19,6 +19,7 @@ paths:
   request: "/request"
   uid:
     root: "/{uid}"
+    download: "/download/{filename}"
     blend:
       root: "/blend"
       update: "/update/{filename}/{status}"
