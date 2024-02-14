@@ -33,6 +33,7 @@ type OrderProvider interface {
 	Create(order models.Order) error
 	GetOne(id int64) (*models.Order, error)
 	GetMany(id int64) ([]models.Order, error)
+	UpdateStatus(storingName string, uid, statusId int64) error
 	SoftDelete(id int64) error
 }
 
@@ -139,6 +140,14 @@ func (s *OrderService) GetManyOrders(id int64) ([]dto.GetOrderDTO, error) {
 	}
 
 	return ordersDTO, nil
+}
+
+func (s *OrderService) UpdateOrderStatus(dto dto.UpdateOrderStatusDTO) error {
+	err := s.orderProvider.UpdateStatus(dto.StoringName, dto.UserId, s.statusesStrToInt[dto.Status])
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (s *OrderService) SoftDeleteOneOrder(id int64) error {

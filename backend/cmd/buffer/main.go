@@ -8,6 +8,8 @@ import (
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
 	"cloud-render/internal/lib/tokenManager"
+	"cloud-render/internal/repository"
+	"cloud-render/internal/service"
 	"context"
 	"errors"
 	"fmt"
@@ -26,6 +28,7 @@ func main() {
 	// Envs
 	cfgPath := os.Getenv("BUFFER_CONFIG_PATH")
 	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	inputPath := os.Getenv("FILES_INPUT_PATH")
 
 	// Config
 	cfg := config.MustLoad(cfgPath)
@@ -60,6 +63,28 @@ func main() {
 	}
 	_ = jwtManager
 
+	// Static repos
+	orderStatusRepository := repository.NewOrderStatusRepository(pg)
+
+	// Static maps
+	orderStatusesStrToInt, err := orderStatusRepository.GetStatusesMapStringToInt()
+	if err != nil {
+		log.Error("failed to get order statuses str to int", sl.Err(err))
+		os.Exit(-1)
+	}
+	orderStatusesIntToStr, err := orderStatusRepository.GetStatusesMapIntToString()
+	if err != nil {
+		log.Error("failed to get order statuses int to str", sl.Err(err))
+		os.Exit(-1)
+	}
+
+	// Dynamic repos
+	orderRepository := repository.NewOrderRepository(pg)
+
+	// Services
+	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
+		inputPath, cfg, client)
+
 	// Router
 	router := chi.NewRouter()
 
@@ -71,6 +96,12 @@ func main() {
 
 	// Router handlers
 	router.Get(cfg.Paths.Request, buffer.Request(log, client, cfg))
+	router.Route(cfg.Paths.UID.Root, func(uidRouter chi.Router) {
+		uidRouter.Route(cfg.Paths.UID.Blend.Root, func(blendRouter chi.Router) {
+			blendRouter.Put(cfg.Paths.UID.Blend.Update, buffer.Update(log, orderService))
+		})
+
+	})
 
 	// Server
 	httpServer := http.Server{

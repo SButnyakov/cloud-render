@@ -33,7 +33,7 @@ type DB struct {
 	Password       string `yaml:"password" env-default:"password"`
 	Host           string `yaml:"host" env-default:"postgres"`
 	Port           string `yaml:"port" env-default:"5432"`
-	MigrationsPath string `yaml:"migrations_path", env-required:"false"`
+	MigrationsPath string `yaml:"migrations_path" env-required:"false"`
 }
 
 type Paths struct {
@@ -47,6 +47,7 @@ type Paths struct {
 	Send      string `yaml:"send" env-default:"/send"`
 	Orders    Orders `yaml:"orders"`
 	Request   string `yaml:"request" env-default:"/request"`
+	UID       UID    `yaml:"uid"`
 }
 
 type Orders struct {
@@ -54,6 +55,16 @@ type Orders struct {
 	Orders    string `yaml:"orders" env-default:"/"`
 	Order     string `yaml:"order" env-default:"/{id}"`
 	DeleteOne string `yaml:"delete_one" env-default:"/{id}/delete"`
+}
+
+type UID struct {
+	Root  string `yaml:"root" env-default:"/{uid}"`
+	Blend Blend  `yaml:"blend"`
+}
+
+type Blend struct {
+	Root   string `yaml:"root" env-default:"/blend"`
+	Update string `yaml:"/update/{filename}/{status}"`
 }
 
 type Redis struct {

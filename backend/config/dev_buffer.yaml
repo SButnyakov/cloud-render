@@ -17,6 +17,11 @@ redis:
   priority_queue_name: "subscribed-render-list"
 paths:
   request: "/request"
+  uid:
+    root: "/{uid}"
+    blend:
+      root: "/blend"
+      update: "/update/{filename}/{status}"
 order_statuses:
   in_queue: "in queue"
   in_progress: "in progress"
