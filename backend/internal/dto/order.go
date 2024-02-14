@@ -20,3 +20,9 @@ type GetOrderDTO struct {
 	OrderStatus  string
 	DownloadLink string
 }
+
+type UpdateOrderStatusDTO struct {
+	UserId      int64
+	StoringName string
+	Status      string
+}
