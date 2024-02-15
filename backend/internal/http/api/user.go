@@ -15,9 +15,9 @@ import (
 
 type UserResposne struct {
 	resp.Response
-	Login      string     `json:"login"`
-	Email      string     `json:"email"`
-	ExpireDate *time.Time `json:"expirationDate"`
+	Login      string    `json:"login"`
+	Email      string    `json:"email"`
+	ExpireDate time.Time `json:"expirationDate"`
 }
 
 type UserInfoProvider interface {

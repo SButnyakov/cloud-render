@@ -35,5 +35,5 @@ type GetUserDTO struct {
 type UserInfoDTO struct {
 	Login          string
 	Email          string
-	ExpirationDate *time.Time
+	ExpirationDate time.Time
 }

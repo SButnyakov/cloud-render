@@ -18,7 +18,7 @@ type SubscriptionService struct {
 }
 
 type SubscriptionProvider interface {
-	GetExpireDate(uid int64) (*time.Time, error)
+	GetExpireDate(uid int64) (time.Time, error)
 	Create(subscription models.Subscription, payment models.Payment) error
 	Update(subscription models.Subscription, payment models.Payment) error
 }
@@ -38,7 +38,7 @@ func NewSubscriptionService(subscriptionProvider SubscriptionProvider, config *c
 
 func (s *SubscriptionService) GetExpireDateWithUserInfo(id int64) (*dto.UserInfoDTO, error) {
 	userDataChan := make(chan *dto.GetUserDTO)
-	expDateChan := make(chan *time.Time)
+	expDateChan := make(chan time.Time)
 
 	go s.asyncGetUserInfo(userDataChan, s.config.External.SSOUserInfo, id)
 	go s.asyncGetExpireDate(expDateChan, id)
@@ -60,7 +60,7 @@ func (s *SubscriptionService) GetExpireDateWithUserInfo(id int64) (*dto.UserInfo
 	}, nil
 }
 
-func (s *SubscriptionService) asyncGetExpireDate(out chan<- *time.Time, id int64) {
+func (s *SubscriptionService) asyncGetExpireDate(out chan<- time.Time, id int64) {
 	time, err := s.subscriptionProvider.GetExpireDate(id)
 	if err != nil {
 		close(out)
@@ -94,7 +94,7 @@ func (s *SubscriptionService) SubscribeUser(id int64) error {
 		return err
 	}
 
-	if expireDate == nil {
+	if expireDate.IsZero() {
 		return s.createSubscription(id, pTypeId, sTypeId)
 	} else {
 		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)
@@ -113,7 +113,7 @@ func (s *SubscriptionService) createSubscription(id, pType, sType int64) error {
 	})
 }
 
-func (s *SubscriptionService) updateSubscription(id, pType, sType int64, expDate *time.Time) error {
+func (s *SubscriptionService) updateSubscription(id, pType, sType int64, expDate time.Time) error {
 	return s.subscriptionProvider.Update(models.Subscription{
 		UserId:     id,
 		TypeId:     sType,
