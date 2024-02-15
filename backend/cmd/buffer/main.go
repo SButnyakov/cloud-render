@@ -95,6 +95,7 @@ func main() {
 	router.Use(mwLogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
+	router.Use(cors.New())
 
 	// Router handlers
 	router.Get("/request", buffer.Request(log, client, cfg))
@@ -107,7 +108,6 @@ func main() {
 			imageRouter.Post("/upload", buffer.Upload(log, orderService))
 			imageRouter.Route("/", func(authImageRouter chi.Router) {
 				authImageRouter.Use(auth.New(log, jwtManager))
-				authImageRouter.Use(cors.New())
 				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
 			})
 		})
