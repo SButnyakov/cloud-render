@@ -27,7 +27,7 @@ import (
 func main() {
 	// Envs
 	cfgPath := os.Getenv("BUFFER_CONFIG_PATH")
-	jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	// jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
 	inputPath := os.Getenv("FILES_INPUT_PATH")
 	outputPath := os.Getenv("FILES_OUTPUT_PATH")
 
