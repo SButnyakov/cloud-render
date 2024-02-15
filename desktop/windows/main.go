@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"image"
+	"image/jpeg"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
@@ -15,8 +18,11 @@ import (
 	"path"
 	"path/filepath"
 	"render-app/config"
+	"strconv"
 	"strings"
 	"time"
+
+	"github.com/disintegration/imaging"
 )
 
 const (
@@ -28,6 +34,13 @@ type ServerResponse struct {
 	Format       string `json:"format"`
 	Resolution   string `json:"resolution"`
 	DownloadLink string `json:"download_link"`
+}
+
+type RenderSettings struct {
+	Format   string
+	ResX     int
+	ResY     int
+	Filename string
 }
 
 func main() {
@@ -83,18 +96,35 @@ func main() {
 
 		log.Println("running blender")
 
+		resArr := strings.Split(resp.Resolution, "x")
+		resX, _ := strconv.Atoi(resArr[0])
+		resY, _ := strconv.Atoi(resArr[1])
+
+		settings := RenderSettings{
+			Format:   strings.ToLower(resp.Format),
+			ResX:     resX,
+			ResY:     resY,
+			Filename: linkFilename,
+		}
+
 		err = runBlender(cfg, filename, pythonPath)
 		if err != nil {
 			log.Println(err)
 			log.Println("failed to render scene")
 			// os.Remove(filename)
-			// os.Remove(fmt.Sprintf("frame0000.%s", resp.Format))
+			// os.Remove("frame0000.png")
 			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
 			continue
 		}
 
 		log.Println("render finished")
-		os.Rename(fmt.Sprintf("frame0000.%s", resp.Format), imageName)
+
+		err = changeImage(settings)
+		if err != nil {
+			// os.Remove(fmt.Sprintf("%s.%s", settings.Filename, settings.Format))
+			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
+			continue
+		}
 
 		status, err := uploadFile(cfg, imageName, uid)
 		if err != nil {
@@ -103,8 +133,81 @@ func main() {
 		}
 
 		log.Println("Response code:", status)
-		// os.Remove(imageName)
+		// os.Remove(fmt.Sprintf("%s.%s", settings.Filename, settings.Format))
 	}
+}
+
+func changeImage(settings RenderSettings) error {
+	f, err := os.Open("frame0000.png")
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	srcImg, _, err := image.Decode(f)
+	if err != nil {
+		return err
+	}
+
+	dstImage := imaging.Resize(srcImg, settings.ResX, settings.ResY, imaging.Lanczos)
+	buf := bytes.Buffer{}
+	err = png.Encode(&buf, dstImage)
+
+	filename := fmt.Sprintf("%s.%s", settings.Filename, settings.Format)
+
+	fBuf := bytes.Buffer{}
+
+	if settings.Format == "png" {
+		fBuf = buf
+	}
+	if settings.Format == "jpg" || settings.Format == "jpeg" {
+		buf2, err := toJpeg(buf.Bytes())
+		if err != nil {
+			return err
+		}
+
+		for _, v := range buf2 {
+			err = fBuf.WriteByte(v)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	err = os.WriteFile(filename, fBuf.Bytes(), 0644)
+	if err != nil {
+		os.Remove(filename)
+		return err
+	}
+
+	return nil
+}
+
+func toJpeg(imageBytes []byte) ([]byte, error) {
+
+	// DetectContentType detects the content type
+	contentType := http.DetectContentType(imageBytes)
+
+	switch contentType {
+	case "image/png":
+		// Decode the PNG image bytes
+		img, err := png.Decode(bytes.NewReader(imageBytes))
+
+		if err != nil {
+			return nil, err
+		}
+
+		buf := new(bytes.Buffer)
+
+		// encode the image as a JPEG file
+		if err := jpeg.Encode(buf, img, nil); err != nil {
+			return nil, err
+		}
+
+		return buf.Bytes(), nil
+	}
+
+	return nil, fmt.Errorf("unable to convert %#v to jpeg", contentType)
 }
 
 func getOrder(cfg *config.Config) (*ServerResponse, error) {
