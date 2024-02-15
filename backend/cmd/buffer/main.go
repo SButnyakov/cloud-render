@@ -5,6 +5,7 @@ import (
 	"cloud-render/internal/db/redis"
 	"cloud-render/internal/http/buffer"
 	"cloud-render/internal/http/middleware/auth"
+	"cloud-render/internal/http/middleware/cors"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
@@ -106,6 +107,7 @@ func main() {
 			imageRouter.Post("/upload", buffer.Upload(log, orderService))
 			imageRouter.Route("/", func(authImageRouter chi.Router) {
 				authImageRouter.Use(auth.New(log, jwtManager))
+				authImageRouter.Use(cors.New())
 				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
 			})
 		})
