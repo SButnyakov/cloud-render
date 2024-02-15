@@ -8,7 +8,6 @@ import (
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/sl"
-	"cloud-render/internal/lib/tokenManager"
 	"cloud-render/internal/repository"
 	"cloud-render/internal/service"
 	"context"
@@ -57,12 +56,14 @@ func main() {
 	}
 	defer client.Close()
 
-	// JWT manager
-	jwtManager, err := tokenManager.New(jwtSecretKey)
-	if err != nil {
-		log.Error("failed to initialize jwt token manager", sl.Err(err))
-		os.Exit(-1)
-	}
+	/*
+		// JWT manager
+		jwtManager, err := tokenManager.New(jwtSecretKey)
+		if err != nil {
+			log.Error("failed to initialize jwt token manager", sl.Err(err))
+			os.Exit(-1)
+		}
+	*/
 
 	// Static repos
 	orderStatusRepository := repository.NewOrderStatusRepository(pg)
