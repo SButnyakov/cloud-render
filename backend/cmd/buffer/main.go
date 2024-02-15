@@ -4,7 +4,6 @@ import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/db/redis"
 	"cloud-render/internal/http/buffer"
-	"cloud-render/internal/http/middleware/auth"
 	"cloud-render/internal/http/middleware/cors"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
@@ -107,7 +106,6 @@ func main() {
 		uidRouter.Route("/image", func(imageRouter chi.Router) {
 			imageRouter.Post("/upload", buffer.Upload(log, orderService))
 			imageRouter.Route("/", func(authImageRouter chi.Router) {
-				authImageRouter.Use(auth.New(log, jwtManager))
 				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
 			})
 		})
