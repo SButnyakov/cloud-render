@@ -9,9 +9,8 @@ import (
 
 func New(cfg *config.Config) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:     cfg.Redis.Address,
-		Password: cfg.Redis.Password,
-		DB:       0,
+		Addr: cfg.Redis.Address,
+		DB:   0,
 	})
 	_, err := client.Ping(context.Background()).Result()
 

@@ -8,16 +8,15 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 )
 
 type UserResposne struct {
 	resp.Response
-	Login      string    `json:"login"`
-	Email      string    `json:"email"`
-	ExpireDate time.Time `json:"expirationDate"`
+	Login      string `json:"login"`
+	Email      string `json:"email"`
+	ExpireDate string `json:"expirationDate"`
 }
 
 type UserInfoProvider interface {
@@ -56,7 +55,7 @@ func User(log *slog.Logger, userInfoProvider UserInfoProvider) http.HandlerFunc 
 			Response:   resp.OK(),
 			Login:      userDTO.Login,
 			Email:      userDTO.Email,
-			ExpireDate: userDTO.ExpirationDate,
+			ExpireDate: userDTO.ExpirationDate.Format("02-01-2006"),
 		})
 	}
 }
