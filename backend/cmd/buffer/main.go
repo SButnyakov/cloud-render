@@ -96,17 +96,17 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	// Router handlers
-	router.Get(cfg.Paths.Request, buffer.Request(log, client, cfg))
-	router.Route(cfg.Paths.UID.Root, func(uidRouter chi.Router) {
-		uidRouter.Route(cfg.Paths.UID.Blend.Root, func(blendRouter chi.Router) {
-			blendRouter.Get(cfg.Paths.UID.Download, buffer.Download(log, inputPath))
-			blendRouter.Put(cfg.Paths.UID.Blend.Update, buffer.Update(log, orderService))
+	router.Get("/request", buffer.Request(log, client, cfg))
+	router.Route("/{uid}", func(uidRouter chi.Router) {
+		uidRouter.Route("/blend", func(blendRouter chi.Router) {
+			blendRouter.Get("/download/{filename}", buffer.Download(log, inputPath))
+			blendRouter.Put("/update/{filename}/{status}", buffer.Update(log, orderService))
 		})
-		uidRouter.Route(cfg.Paths.UID.Image.Root, func(imageRouter chi.Router) {
-			imageRouter.Post(cfg.Paths.UID.Image.Root, buffer.Upload(log, orderService))
+		uidRouter.Route("/image", func(imageRouter chi.Router) {
+			imageRouter.Post("/upload", buffer.Upload(log, orderService))
 			imageRouter.Route("/", func(authImageRouter chi.Router) {
 				authImageRouter.Use(auth.New(log, jwtManager))
-				authImageRouter.Get(cfg.Paths.UID.Download, buffer.Download(log, outputPath))
+				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
 			})
 		})
 	})

@@ -33,7 +33,7 @@ type DB struct {
 	Password       string `yaml:"password" env-default:"password"`
 	Host           string `yaml:"host" env-default:"postgres"`
 	Port           string `yaml:"port" env-default:"5432"`
-	MigrationsPath string `yaml:"migrations_path" env-required:"false"`
+	MigrationsPath string `yaml:"migrations_path"`
 }
 
 type Paths struct {
@@ -109,7 +109,7 @@ func MustLoad(configPath string) *Config {
 
 	err := cleanenv.ReadConfig(configPath, &cfg)
 	if err != nil {
-		log.Fatalf("error reading envs: %s", err)
+		log.Fatalf("error reading config: %s", err)
 	}
 
 	return &cfg

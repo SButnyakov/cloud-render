@@ -40,7 +40,7 @@ func main() {
 	cfg := config.MustLoad(configPath)
 
 	log.Println("setting up python path")
-	pythonPath := path.Join(wd, "python", "render.py")
+	pythonPath := wd + string(os.PathSeparator) + "python" + string(os.PathSeparator) + "render.py"
 
 	for {
 		fmt.Println("requesting new order")
@@ -52,8 +52,9 @@ func main() {
 		}
 
 		log.Println("got new order")
+		log.Println(resp)
 
-		linkArr := strings.Split(resp.DownloadLink, string(os.PathSeparator))
+		linkArr := strings.Split(resp.DownloadLink, "/")
 		uid := linkArr[len(linkArr)-4]
 		filename := linkArr[len(linkArr)-1]
 		linkFilename := strings.Split(filename, ".")[0]
@@ -120,7 +121,7 @@ func getOrder(cfg *config.Config) (*ServerResponse, error) {
 
 	resBody, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println("bad server response")
+		log.Println("bad server response")
 		return nil, err
 	}
 
@@ -128,12 +129,11 @@ func getOrder(cfg *config.Config) (*ServerResponse, error) {
 
 	err = json.Unmarshal(resBody, &response)
 	if err != nil {
-		fmt.Println("bad server response")
+		log.Println("bad server response")
 		return nil, err
 	}
 
 	if response.Status == emptyStatus {
-		fmt.Println("no orders")
 		return nil, errors.New("no orders")
 	}
 
@@ -188,7 +188,13 @@ func updateStatus(cfg *config.Config, uid, linkFilename, status string) error {
 }
 
 func runBlender(cfg *config.Config, filename, script string) error {
-	cmd := exec.Command(fmt.Sprintf("%s %s --python %s --render-output //frame --render-frame 0", cfg.BlenderPath, filename, script))
+	cmd := exec.Command(
+		cfg.BlenderPath,
+		filename,
+		"--background",
+		"--python", script,
+		"--render-output", "//frame",
+		"--render-frame", "0")
 	return cmd.Run()
 }
 
@@ -199,7 +205,7 @@ func uploadFile(cfg *config.Config, filename, uid string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	filePath := path.Join(wd, filename)
+	filePath := wd + string(os.PathSeparator) + filename
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -209,7 +215,6 @@ func uploadFile(cfg *config.Config, filename, uid string) (int, error) {
 
 	buf := &bytes.Buffer{}
 	w := multipart.NewWriter(buf)
-	defer w.Close()
 
 	part, err := w.CreateFormFile("uploadfile", filepath.Base(file.Name()))
 	if err != nil {
@@ -220,6 +225,7 @@ func uploadFile(cfg *config.Config, filename, uid string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	w.Close()
 
 	r, err := http.NewRequest("POST", postURL, buf)
 	if err != nil {

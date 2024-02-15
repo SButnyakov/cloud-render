@@ -14,14 +14,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/redis/go-redis/v9"
 )
 
 type RequestResponse struct {
 	resp.Response
-	Format       string `json:"format,omitempty"`
-	Resolution   string `json:"resolution,omitempty"`
+	Format       string `json:"format"`
+	Resolution   string `json:"resolution"`
 	DownloadLink string `json:"download_link,omitempty"`
 }
 
@@ -31,7 +30,6 @@ func Request(log *slog.Logger, client *redis.Client, cfg *config.Config) http.Ha
 
 		log = log.With(
 			slog.String("fn", fn),
-			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
 		data, err := client.BLPop(context.Background(), time.Second, cfg.Redis.PriorityQueueName).Result()
@@ -59,6 +57,8 @@ func Request(log *slog.Logger, client *redis.Client, cfg *config.Config) http.Ha
 		if err != nil {
 			log.Error("failed to unmarshal new order", sl.Err(err))
 		}
+
+		fmt.Println(newOrder)
 
 		pathList := strings.Split(newOrder.SavePath, "/")
 		listLength := len(pathList)

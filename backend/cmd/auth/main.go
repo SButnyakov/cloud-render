@@ -46,10 +46,12 @@ func main() {
 	}
 	defer pg.Close()
 
-	// Migrating
-	if cfg.Env == "dev" || cfg.Env == "prod" {
-		postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
-	}
+	/*
+		// Migrating
+		if cfg.Env == "dev" || cfg.Env == "prod" {
+			postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
+		}
+	*/
 
 	// JWT manager
 	jwtManager, err := tokenManager.New(jwtSecretKey)
@@ -79,6 +81,7 @@ func main() {
 	router.Post(cfg.Paths.SignIn, auth.SignIn(log, userService))
 	router.Put(cfg.Paths.Edit, auth.Edit(log, userService))
 	router.Get(cfg.Paths.Info, auth.Info(log, userService))
+	router.Put(cfg.Paths.Refresh, auth.Refresh(log, userService))
 
 	// Server
 	httpServer := http.Server{

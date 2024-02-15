@@ -48,14 +48,14 @@ services:
         image: postgres:16.0-bookworm
         restart: always
         container_name: data_base_psql
-        #build: ./backend/migrations/
+        build: ./backend/migrations/schemas/
         environment:
             POSTGRES_DB: "cloud_render_api"
             POSTGRES_USER: "user"
             POSTGRES_PASSWORD: "password"
-            #PGDATA: "/var/lib/postgresql/data/pgdata"
+            PGDATA: "/var/lib/postgresql/data/pgdata"
         volumes:
-            #- ./backend/schemas/:/docker-entrypoint-initdb.d/
+            - ./backend/migrations/schemas/:/docker-entrypoint-initdb.d/
             - dbvolume:/var/lib/postgresql/data
         ports:
             - 5432:5432

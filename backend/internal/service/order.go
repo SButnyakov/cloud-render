@@ -99,6 +99,7 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 		return fmt.Errorf("failed to create new redis record: %w", err)
 	}
 
+	fmt.Println(string(b))
 	s.redis.RPush(context.Background(), s.cfg.Redis.QueueName, string(b))
 
 	return nil
@@ -134,14 +135,16 @@ func (s *OrderService) UpdateOrderImage(dto dto.UpdateOrderImageDTO) error {
 		return err
 	}
 
-	downloadLink := fmt.Sprintf("http://%s:%d/%s/images/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
+	downloadLink := fmt.Sprintf("http://%s:%d/%s/image/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
 
 	err = s.orderProvider.UpdateDownloadLink(int64(id), strings.Split(dto.Header.Filename, ".")[0], downloadLink)
 	if err != nil {
 		return err
 	}
 
-	err = os.Remove(filepath.Join(s.inputPath, dto.UserId, strings.Split(dto.Header.Filename, ".")[0]))
+	removingFile := strings.Split(dto.Header.Filename, ".")[0] + ".blend"
+
+	err = os.Remove(filepath.Join(s.inputPath, dto.UserId, removingFile))
 	if err != nil {
 		return err
 	}

@@ -53,7 +53,7 @@ func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
 }
 
 func (o *OrderRepository) GetMany(id int64) ([]models.Order, error) {
-	const fn = "postgres.repos.orders.Orders"
+	const fn = packagePath + "order.Orders"
 
 	stmt, err := o.db.Prepare("SELECT id, fileName, storingName, creation_date, status_id, user_id, download_link FROM orders WHERE is_deleted = FALSE AND user_id = $1")
 	if err != nil {

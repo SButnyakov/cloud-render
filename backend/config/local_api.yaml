@@ -26,7 +26,7 @@ paths:
     order: "/{id}"
     delete_one: "/{id}/delete"
 external:
-  sso_user_info: "http://localhost:8001/info/%d"
+  sso_user_info: "http://localhost:8081/info/%d"
 payments:
   sub_premium_month: "sub-premium-month"
 subscriptions:

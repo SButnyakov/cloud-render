@@ -58,10 +58,12 @@ func main() {
 	}
 	defer client.Close()
 
-	// Migrating
-	if cfg.Env == "dev" || cfg.Env == "prod" {
-		postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
-	}
+	/*
+		// Migrating
+		if cfg.Env == "dev" || cfg.Env == "prod" {
+			postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
+		}
+	*/
 
 	// JWT manager
 	jwtManager, err := tokenManager.New(jwtSecretKey)
@@ -118,14 +120,14 @@ func main() {
 	router.Use(auth.New(log, jwtManager))
 
 	// Router handlers
-	router.Post(cfg.Paths.Subscribe, api.Subscribe(log, cfg, subscriptionService))
-	router.Get(cfg.Paths.User, api.User(log, subscriptionService))
-	router.Post(cfg.Paths.Send, api.Send(log, orderService))
+	router.Post("/subscribe", api.Subscribe(log, cfg, subscriptionService))
+	router.Post("/send", api.Send(log, orderService))
+	router.Get("/user", api.User(log, subscriptionService))
 
-	router.Route(cfg.Paths.Orders.Root, func(ordersRouter chi.Router) {
-		ordersRouter.Get(cfg.Paths.Orders.Orders, api.Orders(log, orderService))
-		ordersRouter.Get(cfg.Paths.Orders.Order, api.Order(log, orderService))
-		ordersRouter.Post(cfg.Paths.Orders.DeleteOne, api.DeleteOrder(log, orderService))
+	router.Route("/orders", func(ordersRouter chi.Router) {
+		ordersRouter.Get("/", api.Orders(log, orderService))
+		ordersRouter.Get("/{id}", api.Order(log, orderService))
+		ordersRouter.Post("/{id}/delete", api.DeleteOrder(log, orderService))
 	})
 
 	// Server

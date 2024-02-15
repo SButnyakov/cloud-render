@@ -43,6 +43,14 @@ func Send(log *slog.Logger, orderCreator OrderCreator) http.HandlerFunc {
 
 		id := r.Context().Value("uid").(int64)
 
+		log.Info("orderDTO", slog.Any("order", dto.CreateOrderDTO{
+			UserId:     id,
+			Format:     format,
+			Resolution: resolution,
+			File:       file,
+			Header:     header,
+		}))
+
 		err = orderCreator.CreateOrder(dto.CreateOrderDTO{
 			UserId:     id,
 			Format:     format,

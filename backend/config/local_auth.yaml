@@ -16,4 +16,4 @@ paths:
   signin: "/signin"
   refresh: "/refresh"
   edit: "/user/edit"
-  info: "/info"
+  info: "/info/{id}"

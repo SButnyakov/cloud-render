@@ -81,22 +81,22 @@ func (s *SubscriptionRepository) Update(subscription models.Subscription, paymen
 	return nil
 }
 
-func (s *SubscriptionRepository) GetExpireDate(uid int64) (*time.Time, error) {
+func (s *SubscriptionRepository) GetExpireDate(uid int64) (time.Time, error) {
 	const fn = packagePath + "subscription.GetExpireDate"
 
 	stmt, err := s.db.Prepare("SELECT sub_expire_date FROM subscriptions WHERE user_id = $1")
 	if err != nil {
-		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
+		return time.Time{}, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 
-	var expireDate *time.Time
+	var expireDate time.Time
 
 	_ = stmt.QueryRow(uid).Scan(&expireDate)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrSubscriptionNotFound)
+			return time.Time{}, fmt.Errorf("%s: execute statement: %w", fn, ErrSubscriptionNotFound)
 		}
-		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
+		return time.Time{}, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 
 	return expireDate, nil
