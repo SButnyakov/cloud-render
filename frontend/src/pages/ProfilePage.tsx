@@ -343,11 +343,3 @@ const ProfilePage = observer(() => {
 })
 
 export default ProfilePage
-
-/* Create orders table */
-/* Add order actions */
-/* Add profile block */
-/* Add edit profile information logic */
-/* Add subscription logic */
-/* Http controls for order status page */
-/* Add modal page for delete order */
