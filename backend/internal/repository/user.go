@@ -78,26 +78,35 @@ func (u *UserRepository) UpdateUser(user models.User) error {
 	return nil
 }
 
-func (u *UserRepository) CheckCredentials(loginOrEmail, password string) (int64, error) {
+func (u *UserRepository) GetCredentials(loginOrEmail, password string) ([]models.User, error) {
 	const fn = packagePath + "user.CheckCredentials"
 
-	stmt, err := u.db.Prepare("SELECT id FROM users WHERE (login=$1 OR email=$1) AND password=$2")
+	stmt, err := u.db.Prepare("SELECT id, password FROM users WHERE login=$1 OR email=$1")
 	if err != nil {
-		return 0, fmt.Errorf("%s: prepare statement: %w", fn, err)
+		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 
-	var uid int64
-
-	err = stmt.QueryRow(loginOrEmail, password).Scan(&uid)
+	rows, err := stmt.Query(loginOrEmail)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return 0, ErrUserNotFound
+			return nil, ErrUserNotFound
 		}
 
-		return 0, fmt.Errorf("%s: execute statement: %w", fn, err)
+		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 
-	return uid, nil
+	users := make([]models.User, 0)
+
+	for rows.Next() {
+		user := models.User{}
+		err = rows.Scan(&user.Id, &user.Password)
+		if err != nil {
+			return nil, fmt.Errorf("%s: scanning rows: %w", fn, err)
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }
 
 func (u *UserRepository) UpdateRefreshToken(uid int64, refreshToken string) error {

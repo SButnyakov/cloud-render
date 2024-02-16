@@ -2,10 +2,12 @@ package service
 
 import (
 	"cloud-render/internal/dto"
+	"cloud-render/internal/lib/password"
 	"cloud-render/internal/lib/tokenManager"
 	"cloud-render/internal/models"
 	"cloud-render/internal/repository"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -13,7 +15,7 @@ type UserProvider interface {
 	CreateUser(user models.User) error
 	GetOneUser(uid int64) (*models.User, error)
 	UpdateUser(user models.User) error
-	CheckCredentials(loginOrEmail, password string) (int64, error)
+	GetCredentials(loginOrEmail, password string) ([]models.User, error)
 	UpdateRefreshToken(uid int64, refreshToken string) error
 	GetRefreshToken(uid int64) (string, error)
 }
@@ -31,10 +33,15 @@ func NewUserService(userProvider UserProvider, tokenManager *tokenManager.Manage
 }
 
 func (s *UserService) CreateUser(userDTO dto.CreateUserDTO) error {
-	err := s.userProvider.CreateUser(models.User{
+	hash, err := password.HashPassword(userDTO.Password)
+	if err != nil {
+		return err
+	}
+
+	err = s.userProvider.CreateUser(models.User{
 		Login:    userDTO.Login,
 		Email:    userDTO.Email,
-		Password: userDTO.Password,
+		Password: hash,
 	})
 	if err != nil {
 		if errors.Is(err, repository.ErrUserExists) {
@@ -76,7 +83,13 @@ func (s *UserService) EditUer(userDTO dto.EditUserDTO) error {
 }
 
 func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error) {
-	id, err := s.userProvider.CheckCredentials(userDTO.LoginOrEmail, userDTO.Password)
+	hash, err := password.HashPassword(userDTO.Password)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println(hash)
+
+	users, err := s.userProvider.GetCredentials(userDTO.LoginOrEmail, hash)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return nil, ErrInvalidCredentials
@@ -84,12 +97,17 @@ func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error
 		return nil, err
 	}
 
-	accessToken, refreshToken, err := s.updateTokens(id)
-	if err != nil {
-		return nil, err
+	for _, v := range users {
+		if password.CheckPasswordHash(userDTO.Password, v.Password) {
+			accessToken, refreshToken, err := s.updateTokens(v.Id)
+			if err != nil {
+				return nil, err
+			}
+			return &dto.AuthUserDTO{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+		}
 	}
 
-	return &dto.AuthUserDTO{AccessToken: accessToken, RefreshToken: refreshToken}, nil
+	return nil, ErrInvalidCredentials
 }
 
 func (s *UserService) ReauthUser(userDTO dto.ReAuthUserDTO) (*dto.ReAuthUserDTO, error) {
