@@ -9,7 +9,6 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
-	"strconv"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -60,16 +59,10 @@ func Edit(log *slog.Logger, editor UserEditor) http.HandlerFunc {
 			return
 		}
 
-		id := r.Context().Value("uid").(string)
-		idInt64, err := strconv.ParseInt(id, 10, 64)
-		if err != nil {
-			log.Error("invalid id", sl.Err(err))
-			responseError(w, r, resp.Error("invalid id"), http.StatusBadRequest)
-			return
-		}
+		id := r.Context().Value("uid").(int64)
 
 		err = editor.EditUer(dto.EditUserDTO{
-			Id:       idInt64,
+			Id:       id,
 			Login:    req.Login,
 			Email:    req.Email,
 			Password: req.Password,
