@@ -3,6 +3,7 @@ package main
 import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/http/auth"
+	authMw "cloud-render/internal/http/middleware/auth"
 	"cloud-render/internal/http/middleware/cors"
 	mwLogger "cloud-render/internal/http/middleware/logger"
 	"cloud-render/internal/lib/config"
@@ -79,9 +80,13 @@ func main() {
 	// Router handlers
 	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))
 	router.Post(cfg.Paths.SignIn, auth.SignIn(log, userService))
-	router.Put(cfg.Paths.Edit, auth.Edit(log, userService))
+
 	router.Get(cfg.Paths.Info, auth.Info(log, userService))
 	router.Put(cfg.Paths.Refresh, auth.Refresh(log, userService))
+	router.Route("/", func(editRouter chi.Router) {
+		editRouter.Use(authMw.New(log, jwtManager))
+		editRouter.Put("/user/edit", auth.Edit(log, userService))
+	})
 
 	// Server
 	httpServer := http.Server{
