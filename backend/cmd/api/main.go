@@ -58,12 +58,10 @@ func main() {
 	}
 	defer client.Close()
 
-	/*
-		// Migrating
-		if cfg.Env == "dev" || cfg.Env == "prod" {
-			postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
-		}
-	*/
+	// Migrating
+	if cfg.Env == "dev" || cfg.Env == "prod" {
+		postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
+	}
 
 	// JWT manager
 	jwtManager, err := tokenManager.New(jwtSecretKey)
