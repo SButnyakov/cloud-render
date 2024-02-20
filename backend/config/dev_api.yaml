@@ -10,7 +10,7 @@ db:
   password: "password"
   host: "postgres"
   port: "5432"
-  migrations_path: "file://../../../migrations/api/postgres"
+  migrations_path: "file://../migrations/api/postgres"
 redis:
   address: "redis:6379"
   password: "password"

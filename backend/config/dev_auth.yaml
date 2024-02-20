@@ -10,7 +10,7 @@ db:
   password: "password"
   host: "postgres"
   port: "5432"
-  migrations_path: "file://../../../migrations/auth/postgres"
+  migrations_path: "file://../migrations/auth/postgres"
 paths:
   signup: "/signup"
   signin: "/signin"
