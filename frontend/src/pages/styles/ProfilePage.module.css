@@ -168,9 +168,11 @@ h2 {
 }
 
 .errorBlockMessage {
+  display: flex;
+  justify-content: center;
   color: red;
   width: 250px;
-  margin-left: 30px;
+  /* margin-left: 30px; */
   margin-bottom: 10px;
   justify-self: center;
   align-self: center;

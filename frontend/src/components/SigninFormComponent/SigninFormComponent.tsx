@@ -77,10 +77,10 @@ export const SigninForm = observer(() => {
           <button disabled={!login || !password}>Log In</button>
           <button onClick={() => {route('/signup')}}>Register</button>
         </div>
+        <div className={styles.errorBlockMessage}>
+          <p>{errorMessage}</p>
+        </div>
       </form>
-      <div className={styles.errorBlockMessage}>
-        {errorMessage}
-      </div>
     </div>
   )
 })
