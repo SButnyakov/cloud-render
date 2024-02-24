@@ -3,7 +3,7 @@ import { makeAutoObservable } from "mobx"
 export type User = {
   login: string,
   email: string,
-  exparationDate?: string
+  expirationDate?: string
 }
 
 export class UserStore {
@@ -25,7 +25,7 @@ export class UserStore {
   }
 
   public setExparationDate(date: string) {
-    this._user.exparationDate = date
+    this._user.expirationDate = date
 
     localStorage.setItem('user', JSON.stringify(this._user))
   }
@@ -36,7 +36,7 @@ export class UserStore {
 
   public setUser(user: User) {
     this._user = user
-    this._user.exparationDate = ''
+    this._user.expirationDate = ''
 
     localStorage.setItem('user', JSON.stringify(this._user))
   }

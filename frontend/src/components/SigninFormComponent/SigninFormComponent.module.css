@@ -1,5 +1,8 @@
 .errorBlockMessage {
   color: red;
+  display: flex;
+
+  justify-content: center;
 }
 
 .formContainer {
@@ -47,7 +50,7 @@
   background-color: #ccc0f4;
   padding: 10px 20px;
   text-transform: uppercase;
-  cursor: pointer;
+
   border-radius: 15px;
   margin: 10px;
 }

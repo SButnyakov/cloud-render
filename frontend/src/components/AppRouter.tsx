@@ -20,21 +20,25 @@ export const AppRouter = observer(() => {
           <Route path="/profile" element={<ProfilePage/>}/>
           <Route path="/order/:id" element={<OrderStatusPage/>}/>
           <Route path="/upload" element={<UploadPage/>}/>
+          <Route
+            path="*" 
+            element={<Navigate to="/upload" replace/>}
+          />
         </>
       )}
-
+      
       {!userStore.isAuth && (
         <>
-        <Route path="/signin" element={<AuthPage/>}/>
-        <Route path="/signup" element={<RegisterPage/>}/>
-        <Route path="/landing" element={<LandingPage/>}/>
+          <Route path="/signin" element={<AuthPage/>}/>
+          <Route path="/signup" element={<RegisterPage/>}/>
+          <Route path="/landing" element={<LandingPage/>}/>
+          <Route
+            path="*" 
+            element={<Navigate to="/landing" replace/>}
+          />
         </>
       )}
 
-      {/* <Route
-        path="*" 
-        element={<Navigate to="/" replace/>}
-      /> */}
     </Routes>
   )
 })

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import styles from './styles/OrderStatusPage.module.css'
-import { getOrder } from "../http/OrdersAPI";
+import { downloadOrder, getOrder } from "../http/OrdersAPI";
 
 const OrderStatusPage = () => {
   const params = useParams()
@@ -21,12 +21,18 @@ const OrderStatusPage = () => {
   })
 
   const handleDownloadImage = () => {
-    const link = document.createElement('a');
-    link.href = downloadLink;
-    link.download = ''
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const preparedLink = downloadLink.slice(20)
+
+    downloadOrder(preparedLink).then((res) => {
+      const downloadUrl = window.URL.createObjectURL(res);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'order.png'); // Имя файла, под которым он будет сохранён
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link); // Очищаем DOM от ссылки после скачивания
+      window.URL.revokeObjectURL(downloadUrl);
+    })
   }
   return (
     <div className={styles.orderStatus}>
