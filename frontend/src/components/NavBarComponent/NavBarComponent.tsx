@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import cl from './NavBarComponent.module.css'
 import { useNavigate } from 'react-router-dom'
 import { observer } from 'mobx-react-lite'
 import { useStore } from '../../hooks/useStore'
 import Modal from '../ModalWindowComponent/ModalWindowComponent'
+import { getUser } from '../../http/UserApi'
 
 
 const NavBarComponent = observer(() => {
@@ -11,10 +12,21 @@ const NavBarComponent = observer(() => {
 
   const route = useNavigate()
   const {userStore} = useStore()
+  const [user, setUser] = useState('')
 
   const [isSelectVisible, setIsSelectVisible] = useState(false)
 
   const [isQuitModal, setIsQuitModal] = useState(false)
+
+  useEffect(() => {
+    
+    if (userStore.isAuth) {
+      getUser()
+      .then(res => {
+        setUser(res.login)
+      })
+    }
+  }, [userStore.isAuth])
 
   const closeModalSub = () => {
     setIsQuitModal(false);
@@ -56,7 +68,7 @@ const NavBarComponent = observer(() => {
             className={cl.profileBlock}
             onClick={() => setIsSelectVisible(!isSelectVisible)}>
             <div className={cl.profileName}>
-              {userStore.user.login}
+              {user}
             </div>
             <svg width="41" height="27" viewBox="0 0 41 27" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M37.5697 7.00013L19.0002 20.2355" stroke="#8C6CF3" strokeWidth="5"/>

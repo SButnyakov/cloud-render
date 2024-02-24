@@ -14,6 +14,10 @@ const $convertHost = axios.create({
   baseURL: process.env.REACT_APP_API_CONVERT_BLEND
 })
 
+const $bufferHost = axios.create({
+  baseURL: process.env.REACT_APP_API_BUFFER_URL
+})
+
 const authInterceptor = (config: any) => {
   config.headers.authorization = `Bearer ${localStorage.getItem('token')}`
   return config
@@ -45,9 +49,14 @@ $authHost.interceptors.request.use(authInterceptor)
 
 $authHost.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
 
+$bufferHost.interceptors.request.use(authInterceptor)
+
+$bufferHost.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
+
 export {
   $host,
   $authHost,
-  $convertHost
+  $convertHost,
+  $bufferHost
 }
 

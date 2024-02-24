@@ -134,3 +134,30 @@
 
   margin-top: 15px;
 }
+
+.uploadBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionsBlock {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actionsBlock p {
+  color: red;
+  font-size: 18px;
+}
+
+.actionsBlock button {
+  border: none;
+  color: white;
+  background-color: #ccc0f4;
+  padding: 10px 20px;
+  text-transform: uppercase;
+
+  border-radius: 15px;
+  margin: 10px;
+}

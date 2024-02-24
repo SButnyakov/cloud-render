@@ -24,6 +24,8 @@ const UploadPage = observer(() => {
 
   const [convertedFileName, setConvertedFileName] = useState<string | ArrayBuffer | null>()
 
+  const [uploadErrorMessage, setUploadErrorMessage] = useState('')
+
   const route = useNavigate()
 
   const [file, setFile] = useState<string | Blob>('')
@@ -31,26 +33,55 @@ const UploadPage = observer(() => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const preventDefaults = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+
   const handleGetFile = () => {
     setIsFileUploaded(true)
     setIsLoadingFile(false)
   }
-  console.log(formatSettings)
-  const handleFileUploaded = (event: any) => {
-    
 
-    console.log(event.target.files)
-    if (event.target.files[0]) {
-      setIsLoadingFile(true)
-      setFile(event.target.files[0])
-      setFileName(event.target.files[0].name)
-      
-      convertData(event.target.files[0] as Blob)
-        .then(async res => {
-          setConvertedFileName(res.convertedFileName)
-          
-        })
+  const handleFileUploaded = (event: any, isInputDrag?: boolean) => {
+    
+    if (isInputDrag) {
+      preventDefaults(event);
+      const files = event.dataTransfer.files;
+
+      if (fileInputRef.current !== undefined && fileInputRef.current !== null) {
+        fileInputRef.current.files = files;
+
+        const inputFiles = fileInputRef.current.files as unknown as string[] | Blob[]
+
+        setIsLoadingFile(true)
+        setFile(inputFiles[0])
+        setFileName((inputFiles[0] as any).name)
+        
+        convertData(inputFiles[0] as Blob)
+          .then(async res => {
+            setConvertedFileName(res.convertedFileName)
+            
+          })
+      }
     }
+    else {
+      if (event.target.files[0]) {
+        console.log(event.target.files[0])
+        setIsLoadingFile(true)
+        setFile(event.target.files[0])
+        setFileName(event.target.files[0].name)
+        
+        convertData(event.target.files[0] as Blob)
+          .then(async res => {
+            setConvertedFileName(res.convertedFileName)
+            
+          })
+      }
+    }
+
+    setUploadErrorMessage('')
   }
 
   const findCirrentOrderByid = (orders: Order[]) => {
@@ -71,7 +102,6 @@ const UploadPage = observer(() => {
 
     try {
       await sendUploadedFile(formatSettings, resolutionSettings, file as Blob)
-      console.log(formatSettings)
       const orders = await getOrders()
 
       const newOrder = findCirrentOrderByid(orders)
@@ -109,10 +139,38 @@ const UploadPage = observer(() => {
       }
 
       {(!isLoadingFile && !convertedFileName) &&
-        <div className={styles.uploadField} onClick={simulateFileInputClick}>
-          UPLOAD
-          <input type="file" accept=".blend" onChange={handleFileUploaded} ref={fileInputRef}/>
+        <div className={styles.uploadBlock}>
+          <div 
+            className={styles.uploadField} onClick={simulateFileInputClick} 
+            onDrop={(ev) => {
+              ev.preventDefault();
+              ev.stopPropagation();
+
+              if (ev.dataTransfer.files[0].name.split('.').at(-1)?.localeCompare('blend')) {
+                setUploadErrorMessage('Incorrect input file. Only .blend files required!')
+              }
+              else {
+                handleFileUploaded(ev, true)
+                console.log('upload file')
+              }
+            }}
+            onDragEnter={(e) => preventDefaults(e)}
+            onDragOver={(e) => preventDefaults(e)}
+            onDragLeave={(e) => preventDefaults(e)}
+
+          >
+            UPLOAD
+            <input type="file" accept=".blend" onChange={handleFileUploaded} ref={fileInputRef}/>
+          </div>
+
+          <div className={styles.actionsBlock}>
+              <p>{uploadErrorMessage}</p>
+              <button>
+                  Send
+              </button>
+            </div>
         </div>
+
       }
 
       {isFileUploaded && (
@@ -163,3 +221,7 @@ const UploadPage = observer(() => {
 })
 
 export default UploadPage
+function useCallback(arg0: (e: any) => void, arg1: never[]) {
+  throw new Error("Function not implemented.");
+}
+

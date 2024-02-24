@@ -8,7 +8,7 @@ import { Order } from "../store/OrderStore";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import Modal from "../components/ModalWindowComponent/ModalWindowComponent";
-import { deleteOrder, getOrders } from "../http/OrdersAPI";
+import { deleteOrder, downloadOrder, getOrders } from "../http/OrdersAPI";
 import { subscribe } from "../http/SubscribeAPI";
 
 type OrderProps = {
@@ -45,7 +45,7 @@ const OrderRow = (props: OrderProps) => {
       case 'success':
         return '✅'
       default:
-        return '[ERROR CHARACTER]'
+        return '❌'
     }
       
   }
@@ -55,7 +55,7 @@ const OrderRow = (props: OrderProps) => {
       <div className={styles.rowCell} onClick={() => route(`/order/${order.id}`)}>{order.date}</div>
       <div className={styles.orderActions}>
         <div className={styles.orderAction}>{initStatusIcon()}</div>
-        {order.status === 'success' ? <div className={styles.orderAction} onClick={() => handleDownloadImage(order.downloadLink.String)}>💾</div> : null}
+        {order.status === 'success' ? <div className={styles.orderAction} onClick={() => handleDownloadImage(String(order.downloadLink))}>💾</div> : null}
         <div className={styles.orderAction} onClick={() => handleDelete(order.id)}>🗑️</div> 
       </div>
       
@@ -126,7 +126,7 @@ const ProfilePage = observer(() => {
   useEffect(() => {
     getUser()
       .then(res => {
-        setUser({email: res.email, login: res.login, exparationDate: res.exparationDate})
+        setUser({email: res.email, login: res.login, expirationDate: res.expirationDate})
       })
     
     checkOrdersStatus()
@@ -162,7 +162,7 @@ const ProfilePage = observer(() => {
     
     await getUser()
       .then(res => {
-        setUser({email: res.email, login: res.login, exparationDate: res.exparationDate})
+        setUser({email: res.email, login: res.login, expirationDate: res.expirationDate})
       })
   }
 
@@ -210,25 +210,38 @@ const ProfilePage = observer(() => {
       setExtraErrors('Passwords must be equal!')
     }
     else {
-      await editUser(data.email, data.login, data.password)
+      try {
+        await editUser(data.email, data.login, data.password)
       
-      const user = await getUser()
+        const user = await getUser()
 
-      setUser({email: user.email, login: user.login, exparationDate: user.exparationDate})
+        setUser({email: user.email, login: user.login, expirationDate: user.expirationDate})
+        
+        setIsEditStatus(false)
+      }
+      catch (error) {
+        setExtraErrors((error as any).response.data.error)
+      }
       
-      setIsEditStatus(false)
     } 
   }
 
   /* TODO: Тут дождаться когда будет все ок с ссылкой для скачив */
 
   const handleDownloadImage = (downloadLink: string) => {
-    const link = document.createElement('a');
-    link.href = downloadLink;
-    link.download = ''
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    console.log(downloadLink)
+    const preparedLink = downloadLink.slice(20)
+
+    downloadOrder(preparedLink).then((res) => {
+      const downloadUrl = window.URL.createObjectURL(res);
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', 'order'); // Имя файла, под которым он будет сохранён
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link); // Очищаем DOM от ссылки после скачивания
+      window.URL.revokeObjectURL(downloadUrl);
+    })
   }
 
   return(
@@ -245,8 +258,8 @@ const ProfilePage = observer(() => {
             <div className={styles.formGroup}>
               Login: <div>{user.login}</div>
             </div>
-            <div className={styles.formGroup} style={{visibility: user.exparationDate ? 'visible' : 'hidden'}}>
-              Sub expire date: <div>{user.exparationDate}</div>
+            <div className={styles.formGroup} style={{visibility: user.expirationDate !== '01-01-0001' ? 'visible' : 'hidden'}}>
+              Sub expire date: <div>{user.expirationDate}</div>
             </div>
             <div className={styles.formActions} style={{marginTop: '125px'}}>
               <button type="button" className={styles.cancelButton} onClick={() => openModalSub()}>
