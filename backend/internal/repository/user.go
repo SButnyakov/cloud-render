@@ -43,12 +43,12 @@ func (u *UserRepository) GetOneUser(uid int64) (*models.User, error) {
 
 	var resUser models.User
 
-	stmt, err := u.db.Prepare("SELECT id, login, email FROM users WHERE id=$1")
+	stmt, err := u.db.Prepare("SELECT id, login, email, password FROM users WHERE id=$1")
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 
-	err = stmt.QueryRow(uid).Scan(&resUser.Id, &resUser.Login, &resUser.Email)
+	err = stmt.QueryRow(uid).Scan(&resUser.Id, &resUser.Login, &resUser.Email, &resUser.Password)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, ErrUserNotFound
 	}
@@ -67,19 +67,20 @@ func (u *UserRepository) UpdateUser(user models.User) error {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 
-	_, err = stmt.Exec(user.Id, user.Login, user.Email, user.Password)
-	if errors.Is(err, sql.ErrNoRows) {
-		return ErrUserNotFound
-	}
+	res, err := stmt.Exec(user.Id, user.Login, user.Email, user.Password)
 	if err != nil {
 		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return ErrUserNotFound
 	}
 
 	return nil
 }
 
-func (u *UserRepository) GetCredentials(loginOrEmail, password string) ([]models.User, error) {
-	const fn = packagePath + "user.CheckCredentials"
+func (u *UserRepository) GetHashedPassword(loginOrEmail, password string) ([]models.User, error) {
+	const fn = packagePath + "user.GetHashedPassword"
 
 	stmt, err := u.db.Prepare("SELECT id, password FROM users WHERE login=$1 OR email=$1")
 	if err != nil {
@@ -88,10 +89,6 @@ func (u *UserRepository) GetCredentials(loginOrEmail, password string) ([]models
 
 	rows, err := stmt.Query(loginOrEmail)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
-		}
-
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 
@@ -117,9 +114,13 @@ func (u *UserRepository) UpdateRefreshToken(uid int64, refreshToken string) erro
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 
-	_, err = stmt.Exec(refreshToken, uid)
+	res, err := stmt.Exec(refreshToken, uid)
 	if err != nil {
 		return fmt.Errorf("%s: exec statement: %w", fn, err)
+	}
+
+	if affected, _ := res.RowsAffected(); affected == 0 {
+		return ErrUserNotFound
 	}
 
 	return nil

@@ -1,6 +1,6 @@
-DROP TABLE order_statuses;
 DROP TABLE orders;
-DROP TAbLE payment_types;
+DROP TABLE order_statuses;
 DROP TABLE payments;
-DROP TABLE subscription_types;
+DROP TAbLE payment_types;
 DROP TABLE subscriptions;
+DROP TABLE subscription_types;

@@ -49,6 +49,28 @@ func (s *SubscriptionRepository) Create(subscription models.Subscription, paymen
 	return nil
 }
 
+func (s *SubscriptionRepository) GetOne(id int64) (*models.Subscription, error) {
+	const fn = packagePath + "subscription.GetOne"
+
+	stmt, err := s.db.Prepare("SELECT id, user_id, type_id, sub_expire_date FROM subscriptions WHERE id=$1")
+	if err != nil {
+		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+	defer stmt.Close()
+
+	var sub models.Subscription
+
+	err = stmt.QueryRow(id).Scan(&sub.Id, &sub.UserId, &sub.TypeId, &sub.ExpireDate)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrSubscriptionNotFound
+		}
+		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return &sub, nil
+}
+
 func (s *SubscriptionRepository) Update(subscription models.Subscription, payment models.Payment) error {
 	const fn = packagePath + "subscription.Update"
 
@@ -88,16 +110,17 @@ func (s *SubscriptionRepository) GetExpireDate(uid int64) (*time.Time, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	var expireDate time.Time
 
-	_ = stmt.QueryRow(uid).Scan(&expireDate)
+	err = stmt.QueryRow(uid).Scan(&expireDate)
 	if err != nil {
+
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrSubscriptionNotFound
 		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
-
 	return &expireDate, nil
 }

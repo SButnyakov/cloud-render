@@ -137,7 +137,7 @@ func (s *OrderService) UpdateOrderImage(dto dto.UpdateOrderImageDTO) error {
 
 	downloadLink := fmt.Sprintf("http://%s:%d/%s/image/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
 
-	err = s.orderProvider.UpdateDownloadLink(int64(id), strings.Split(dto.Header.Filename, ".")[0], downloadLink)
+	err = s.orderProvider.UpdateDownloadLink(int64(id), dto.Header.Filename, downloadLink)
 	if err != nil {
 		return err
 	}

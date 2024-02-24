@@ -16,15 +16,12 @@ func main() {
 	}
 
 	var envName string
-	var migrationsPath string
 
 	switch os.Args[1] {
 	case "api":
 		envName = "API_CONFIG_PATH"
-		migrationsPath = "file://../../../migrations/api/postgres"
 	case "auth":
 		envName = "AUTH_CONFIG_PATH"
-		migrationsPath = "file://../../../migrations/auth/postgres"
 	default:
 		log.Fatalf("undefined service")
 	}
@@ -41,11 +38,15 @@ func main() {
 
 	switch os.Args[2] {
 	case "top":
-		err = migrateTop(pg, migrationsPath)
+		err = migrateTop(pg, cfg.DB.MigrationsPath)
 	case "drop":
-		err = dropMigrations(pg, migrationsPath)
+		err = dropMigrations(pg, cfg.DB.MigrationsPath)
 	default:
-		err = migrateNSteps(pg, migrationsPath, os.Args[1])
+		err = migrateNSteps(pg, cfg.DB.MigrationsPath, os.Args[1])
+	}
+
+	if err != nil {
+		log.Fatalf("%s", err.Error())
 	}
 }
 

@@ -22,6 +22,7 @@ func (o *OrderRepository) Create(order models.Order) error {
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	_, err = stmt.Exec(order.FileName, order.StoringName, order.CreationDate, order.UserId, order.StatusId, false)
 	if err != nil {
@@ -38,6 +39,7 @@ func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	var order models.Order
 
@@ -59,12 +61,10 @@ func (o *OrderRepository) GetMany(id int64) ([]models.Order, error) {
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	rows, err := stmt.Query(id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNoOrdersFound
-		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 	defer rows.Close()
@@ -90,26 +90,46 @@ func (o *OrderRepository) UpdateStatus(storingName string, uid, statusId int64) 
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
-	_, err = stmt.Exec(uid, storingName+".blend", statusId)
+	res, err := stmt.Exec(uid, storingName, statusId)
 	if err != nil {
 		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: calc affected rows: %w", fn, err)
+	}
+
+	if affectedRows == 0 {
+		return ErrNoOrdersFound
 	}
 
 	return nil
 }
 
-func (o *OrderRepository) UpdateDownloadLink(id int64, storingName, downloadLink string) error {
+func (o *OrderRepository) UpdateDownloadLink(uid int64, storingName, downloadLink string) error {
 	const fn = packagePath + "order.UpdateDownloadLink"
 
 	stmt, err := o.db.Prepare("UPDATE orders SET download_link = $3 WHERE user_id = $1 AND storingname = $2")
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
-	_, err = stmt.Exec(id, storingName+".blend", downloadLink)
+	res, err := stmt.Exec(uid, storingName, downloadLink)
 	if err != nil {
 		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	affectedRows, err := res.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("%s: calc affected rows: %w", fn, err)
+	}
+
+	if affectedRows == 0 {
+		return ErrNoOrdersFound
 	}
 
 	return nil
@@ -122,6 +142,7 @@ func (o *OrderRepository) SoftDelete(id int64) error {
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	res, err := stmt.Exec(id)
 	if err != nil {

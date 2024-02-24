@@ -15,18 +15,36 @@ func NewOrderStatusRepository(db *sql.DB) *OrderStatusRepository {
 	return &OrderStatusRepository{db: db}
 }
 
+func (os *OrderStatusRepository) Create(status string) error {
+	const fn = packagePath + "order_status.Create"
+
+	stmt, err := os.db.Prepare("INSERT INTO order_statuses (name) VALUES ($1)")
+	if err != nil {
+		return fmt.Errorf("%s: prepare statement: %w", fn, err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(status)
+	if err != nil {
+		return fmt.Errorf("%s: execute statement: %w", fn, err)
+	}
+
+	return nil
+}
+
 func (os *OrderStatusRepository) GetStatusesMapStringToInt() (map[string]int64, error) {
-	const fn = packagePath + "order_statuses.GetStatusesMapStringToInt"
+	const fn = packagePath + "order_statuse.GetStatusesMapStringToInt"
 
 	stmt, err := os.db.Prepare("SELECT id, name FROM order_statuses")
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	rows, err := stmt.Query()
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrNoOrderStatuses)
+			return nil, ErrNoOrderStatuses
 		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
@@ -47,18 +65,16 @@ func (os *OrderStatusRepository) GetStatusesMapStringToInt() (map[string]int64, 
 }
 
 func (os *OrderStatusRepository) GetStatusesMapIntToString() (map[int64]string, error) {
-	const fn = packagePath + "order_statuses.GetStatusesMapIntToString"
+	const fn = packagePath + "order_statuse.GetStatusesMapIntToString"
 
 	stmt, err := os.db.Prepare("SELECT id, name FROM order_statuses")
 	if err != nil {
 		return nil, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
+	defer stmt.Close()
 
 	rows, err := stmt.Query()
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrNoOrderStatuses)
-		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 	defer rows.Close()
@@ -72,6 +88,10 @@ func (os *OrderStatusRepository) GetStatusesMapIntToString() (map[int64]string, 
 			return nil, fmt.Errorf("%s: scanning rows: %w", fn, err)
 		}
 		statuses[status.Id] = status.Name
+	}
+
+	if len(statuses) == 0 {
+		return nil, ErrNoOrderStatuses
 	}
 
 	return statuses, nil

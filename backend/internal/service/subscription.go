@@ -96,7 +96,7 @@ func (s *SubscriptionService) SubscribeUser(id int64) error {
 		return err
 	}
 
-	if expireDate.IsZero() {
+	if expireDate.IsZero() || expireDate.Before(time.Now()) {
 		return s.createSubscription(id, pTypeId, sTypeId)
 	} else {
 		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)

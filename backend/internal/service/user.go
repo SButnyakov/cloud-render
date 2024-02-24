@@ -15,7 +15,7 @@ type UserProvider interface {
 	CreateUser(user models.User) error
 	GetOneUser(uid int64) (*models.User, error)
 	UpdateUser(user models.User) error
-	GetCredentials(loginOrEmail, password string) ([]models.User, error)
+	GetHashedPassword(loginOrEmail, password string) ([]models.User, error)
 	UpdateRefreshToken(uid int64, refreshToken string) error
 	GetRefreshToken(uid int64) (string, error)
 }
@@ -89,7 +89,7 @@ func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error
 	}
 	fmt.Println(hash)
 
-	users, err := s.userProvider.GetCredentials(userDTO.LoginOrEmail, hash)
+	users, err := s.userProvider.GetHashedPassword(userDTO.LoginOrEmail, hash)
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
 			return nil, ErrInvalidCredentials

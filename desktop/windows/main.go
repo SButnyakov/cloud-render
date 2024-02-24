@@ -273,7 +273,7 @@ func downloadFile(url, filename string) error {
 func updateStatus(cfg *config.Config, uid, linkFilename, status string) error {
 	req, err := http.NewRequest(
 		http.MethodPut,
-		fmt.Sprintf("%s/%s/blend/update/%s/%s", cfg.BaseURL, uid, linkFilename, status),
+		fmt.Sprintf("%s/%s/blend/update/%s/%s", cfg.BaseURL, uid, linkFilename+".blend", status),
 		nil)
 	if err != nil {
 		fmt.Println("failed to create request")
