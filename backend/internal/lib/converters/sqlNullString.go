@@ -8,3 +8,7 @@ func NullStringToString(nullString sql.NullString) string {
 	}
 	return ""
 }
+
+func StringToNullString(str string) sql.NullString {
+	return sql.NullString{String: str, Valid: str != ""}
+}
