@@ -104,10 +104,13 @@ func (s *SubscriptionService) SubscribeUser(id int64) error {
 	expireDate, err := s.subscriptionProvider.GetExpireDate(id)
 
 	if err != nil {
+		if errors.Is(err, repository.ErrSubscriptionNotFound) {
+			return s.createSubscription(id, pTypeId, sTypeId)
+		}
 		return err
 	}
 
-	if expireDate.IsZero() || expireDate.Before(time.Now()) {
+	if expireDate.IsZero() || expireDate.Before(time.Now()) || expireDate == nil {
 		return s.createSubscription(id, pTypeId, sTypeId)
 	} else {
 		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)

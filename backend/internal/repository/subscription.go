@@ -116,7 +116,6 @@ func (s *SubscriptionRepository) GetExpireDate(uid int64) (*time.Time, error) {
 
 	err = stmt.QueryRow(uid).Scan(&expireDate)
 	if err != nil {
-
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrSubscriptionNotFound
 		}
