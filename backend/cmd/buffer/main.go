@@ -65,6 +65,8 @@ func main() {
 		}
 	*/
 
+	time.Sleep(time.Second * 10)
+
 	// Static repos
 	orderStatusRepository := repository.NewOrderStatusRepository(pg)
 

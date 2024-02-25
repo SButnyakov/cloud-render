@@ -60,7 +60,14 @@ func main() {
 
 	// Migrating
 	if cfg.Env == "dev" || cfg.Env == "prod" {
-		postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
+		log.Info("running migrations...")
+		log.Debug(cfg.DB.MigrationsPath)
+		err = postgres.MigrateTop(pg, cfg.DB.MigrationsPath)
+		if err != nil {
+			log.Error("failed to run migrations", sl.Err(err))
+			os.Exit(-1)
+		}
+		log.Info("migrations finished...")
 	}
 
 	// JWT manager
