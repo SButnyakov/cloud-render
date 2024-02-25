@@ -109,7 +109,7 @@ func main() {
 	orderRepository := repository.NewOrderRepository(pg)
 
 	// Services
-	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg, subscriptionTypes, paymentTypes)
+	subscriptionService := service.NewSubscriptionService(subscriptionRepository, cfg, subscriptionTypes, paymentTypes, log)
 	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
 		inputPath, outputPath, cfg, client)
 

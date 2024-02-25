@@ -5,7 +5,10 @@ import (
 	"cloud-render/internal/lib/config"
 	"cloud-render/internal/lib/external"
 	"cloud-render/internal/models"
+	"cloud-render/internal/repository"
+	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 )
 
@@ -14,6 +17,7 @@ type SubscriptionService struct {
 	config               *config.Config
 	subMap               SubscriptionsMap
 	payMap               PaymentsMap
+	log                  *slog.Logger
 }
 
 type SubscriptionProvider interface {
@@ -26,12 +30,13 @@ type SubscriptionsMap map[string]int64
 type PaymentsMap map[string]int64
 
 func NewSubscriptionService(subscriptionProvider SubscriptionProvider, config *config.Config,
-	subMap SubscriptionsMap, payMap PaymentsMap) *SubscriptionService {
+	subMap SubscriptionsMap, payMap PaymentsMap, log *slog.Logger) *SubscriptionService {
 	return &SubscriptionService{
 		subscriptionProvider: subscriptionProvider,
 		config:               config,
 		subMap:               subMap,
 		payMap:               payMap,
+		log:                  log,
 	}
 }
 
@@ -55,13 +60,18 @@ func (s *SubscriptionService) GetExpireDateWithUserInfo(id int64) (*dto.UserInfo
 	return &dto.UserInfoDTO{
 		Login:          userDataDTO.Login,
 		Email:          userDataDTO.Email,
-		ExpirationDate: *expDate,
+		ExpirationDate: expDate,
 	}, nil
 }
 
 func (s *SubscriptionService) asyncGetExpireDate(out chan<- *time.Time, id int64) {
 	time, err := s.subscriptionProvider.GetExpireDate(id)
 	if err != nil {
+		if errors.Is(err, repository.ErrSubscriptionNotFound) {
+			out <- nil
+			return
+		}
+		s.log.Error(err.Error())
 		close(out)
 		return
 	}
@@ -71,6 +81,7 @@ func (s *SubscriptionService) asyncGetExpireDate(out chan<- *time.Time, id int64
 func (s *SubscriptionService) asyncGetUserInfo(out chan<- *dto.GetUserDTO, url string, id int64) {
 	userDTO, err := external.UserInfo(url, id)
 	if err != nil {
+		s.log.Error(err.Error())
 		close(out)
 		return
 	}

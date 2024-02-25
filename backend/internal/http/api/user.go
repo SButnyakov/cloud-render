@@ -14,9 +14,9 @@ import (
 
 type UserResposne struct {
 	resp.Response
-	Login      string `json:"login"`
-	Email      string `json:"email"`
-	ExpireDate string `json:"expirationDate"`
+	Login      string  `json:"login"`
+	Email      string  `json:"email"`
+	ExpireDate *string `json:"expirationDate"`
 }
 
 type UserInfoProvider interface {
@@ -51,11 +51,19 @@ func User(log *slog.Logger, userInfoProvider UserInfoProvider) http.HandlerFunc 
 			return
 		}
 
-		responseOK(w, r, UserResposne{
-			Response:   resp.OK(),
-			Login:      userDTO.Login,
-			Email:      userDTO.Email,
-			ExpireDate: userDTO.ExpirationDate.Format("02-01-2006"),
-		})
+		resp := UserResposne{
+			Response: resp.OK(),
+			Login:    userDTO.Login,
+			Email:    userDTO.Email,
+		}
+
+		if userDTO.ExpirationDate != nil {
+			expDateStr := userDTO.ExpirationDate.Format("02-01-2006")
+			resp.ExpireDate = &expDateStr
+		} else {
+			resp.ExpireDate = nil
+		}
+
+		responseOK(w, r, resp)
 	}
 }
