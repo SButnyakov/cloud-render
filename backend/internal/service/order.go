@@ -130,14 +130,14 @@ func (s *OrderService) UpdateOrderImage(dto dto.UpdateOrderImageDTO) error {
 		return err
 	}
 
-	err = s.orderProvider.UpdateStatus(strings.Split(dto.Header.Filename, ".")[0], int64(id), s.statusesStrToInt[s.cfg.OrderStatuses.Success])
+	err = s.orderProvider.UpdateStatus(strings.Split(dto.Header.Filename, ".")[0]+".blend", int64(id), s.statusesStrToInt[s.cfg.OrderStatuses.Success])
 	if err != nil {
 		return err
 	}
 
 	downloadLink := fmt.Sprintf("http://%s:%d/%s/image/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
 
-	err = s.orderProvider.UpdateDownloadLink(int64(id), dto.Header.Filename, downloadLink)
+	err = s.orderProvider.UpdateDownloadLink(int64(id), strings.Split(dto.Header.Filename, ".")[0]+".blend", downloadLink)
 	if err != nil {
 		return err
 	}

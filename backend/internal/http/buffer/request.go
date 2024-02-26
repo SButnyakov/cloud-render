@@ -28,10 +28,6 @@ func Request(log *slog.Logger, client *redis.Client, cfg *config.Config) http.Ha
 	return func(w http.ResponseWriter, r *http.Request) {
 		const fn = packagePath + "request.Request"
 
-		log = log.With(
-			slog.String("fn", fn),
-		)
-
 		data, err := client.BLPop(context.Background(), time.Second, cfg.Redis.PriorityQueueName).Result()
 		if err != nil && !errors.Is(err, redis.Nil) {
 			log.Error("reading redis priority queue fail", sl.Err(err))
