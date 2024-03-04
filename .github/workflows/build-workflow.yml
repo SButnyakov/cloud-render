@@ -30,10 +30,9 @@ jobs:
       - name: upload results
         if: always()
         uses: actions/upload-artifact@v4
-        working-directory: ./backend
         with:
           name: Backend_tests_results
-          path: test_results
+          path: ./backend/test_results
   backend-build:
     runs-on: self-hosted
     needs: backend-test
