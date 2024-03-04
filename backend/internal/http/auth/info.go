@@ -36,7 +36,7 @@ func Info(log *slog.Logger, userProvider UserProvider) http.HandlerFunc {
 		id := chi.URLParam(r, "id")
 		if id == "" {
 			log.Error("id not provided")
-			responseError(w, r, resp.Error("invalid id"), http.StatusBadRequest)
+			responseError(w, r, resp.Error("empty id param"), http.StatusBadRequest)
 			return
 		}
 
@@ -54,6 +54,9 @@ func Info(log *slog.Logger, userProvider UserProvider) http.HandlerFunc {
 				responseError(w, r, resp.Error("user not found"), http.StatusNotFound)
 				return
 			}
+			log.Error("failed to get user", sl.Err(err))
+			responseError(w, r, resp.Error("failed to get user"), http.StatusInternalServerError)
+			return
 		}
 
 		responseOK(w, r, InfoResponse{

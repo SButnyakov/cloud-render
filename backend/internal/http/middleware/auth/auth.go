@@ -3,7 +3,6 @@ package auth
 import (
 	resp "cloud-render/internal/lib/response"
 	"cloud-render/internal/lib/sl"
-	"cloud-render/internal/lib/tokenManager"
 	"context"
 	"log/slog"
 	"net/http"
@@ -11,10 +10,15 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/go-chi/render"
 )
 
-func New(log *slog.Logger, m *tokenManager.Manager) func(next http.Handler) http.Handler {
+type TokenManager interface {
+	Parse(token string) (*jwt.StandardClaims, error)
+}
+
+func New(log *slog.Logger, m TokenManager) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			header := r.Header.Get("Authorization")

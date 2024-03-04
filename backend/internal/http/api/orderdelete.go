@@ -51,6 +51,5 @@ func DeleteOrder(log *slog.Logger, orderDeleter OneOrderSoftDelter) http.Handler
 		}
 
 		responseOK(w, r, resp.OK())
-		return
 	}
 }

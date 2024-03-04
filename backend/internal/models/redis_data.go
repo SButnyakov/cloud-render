@@ -4,5 +4,5 @@ package models
 type RedisData struct {
 	Format     string `json:"format"`
 	Resolution string `json:"resolution"`
-	SavePath   string
+	SavePath   string `json:"save_path"`
 }

@@ -42,6 +42,11 @@ func Update(log *slog.Logger, updater OrderStatusUpdater) http.HandlerFunc {
 			StoringName: fileName,
 			Status:      status,
 		})
+		if err != nil {
+			log.Error("failed to update status", sl.Err(err))
+			responseError(w, r, resp.Error("failed to update status"), http.StatusInternalServerError)
+			return
+		}
 
 		responseOK(w, r, resp.OK())
 	}

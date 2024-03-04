@@ -7,7 +7,6 @@ import (
 	"cloud-render/internal/models"
 	"cloud-render/internal/repository"
 	"errors"
-	"fmt"
 	"log/slog"
 	"time"
 )
@@ -99,18 +98,16 @@ func (s *SubscriptionService) SubscribeUser(id int64) error {
 		return ErrSubscriptionTypeNotFound
 	}
 
-	fmt.Println("subscribing")
-
 	expireDate, err := s.subscriptionProvider.GetExpireDate(id)
 
-	if err != nil {
+	if err != nil || expireDate == nil {
 		if errors.Is(err, repository.ErrSubscriptionNotFound) {
 			return s.createSubscription(id, pTypeId, sTypeId)
 		}
 		return err
 	}
 
-	if expireDate.IsZero() || expireDate.Before(time.Now()) || expireDate == nil {
+	if expireDate.IsZero() || expireDate.Before(time.Now()) {
 		return s.createSubscription(id, pTypeId, sTypeId)
 	} else {
 		return s.updateSubscription(id, pTypeId, sTypeId, expireDate)

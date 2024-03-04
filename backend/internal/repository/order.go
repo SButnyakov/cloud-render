@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 )
 
 type OrderRepository struct {
@@ -117,6 +118,9 @@ func (o *OrderRepository) UpdateDownloadLink(uid int64, storingName, downloadLin
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 	defer stmt.Close()
+
+	log.Println(uid)
+	log.Println(storingName)
 
 	res, err := stmt.Exec(uid, storingName, downloadLink)
 	if err != nil {

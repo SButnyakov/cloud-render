@@ -2,8 +2,9 @@ package response
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"strings"
+
+	"github.com/go-playground/validator/v10"
 )
 
 const (
@@ -53,6 +54,7 @@ func ValidationError(errs validator.ValidationErrors) Response {
 	}
 
 	return Response{
-		Error: strings.Join(errMsgs, ", "),
+		Status: StatusError,
+		Error:  strings.Join(errMsgs, ", "),
 	}
 }

@@ -3,12 +3,12 @@ package service
 import (
 	"cloud-render/internal/dto"
 	"cloud-render/internal/lib/password"
-	"cloud-render/internal/lib/tokenManager"
 	"cloud-render/internal/models"
 	"cloud-render/internal/repository"
 	"errors"
-	"fmt"
 	"strconv"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 type UserProvider interface {
@@ -20,12 +20,18 @@ type UserProvider interface {
 	GetRefreshToken(uid int64) (string, error)
 }
 
-type UserService struct {
-	userProvider UserProvider
-	tokenManager *tokenManager.Manager
+type TokenManager interface {
+	NewJWT(int64) (string, error)
+	NewRT(int64) (string, error)
+	Parse(string) (*jwt.StandardClaims, error)
 }
 
-func NewUserService(userProvider UserProvider, tokenManager *tokenManager.Manager) *UserService {
+type UserService struct {
+	userProvider UserProvider
+	tokenManager TokenManager
+}
+
+func NewUserService(userProvider UserProvider, tokenManager TokenManager) *UserService {
 	return &UserService{
 		userProvider: userProvider,
 		tokenManager: tokenManager,
@@ -66,7 +72,7 @@ func (s *UserService) GetUser(id int64) (*dto.GetUserDTO, error) {
 	}, nil
 }
 
-func (s *UserService) EditUer(userDTO dto.EditUserDTO) error {
+func (s *UserService) EditUser(userDTO dto.EditUserDTO) error {
 	err := s.userProvider.UpdateUser(models.User{
 		Id:       userDTO.Id,
 		Login:    userDTO.Login,
@@ -87,7 +93,6 @@ func (s *UserService) AuthUser(userDTO dto.AuthUserDTO) (*dto.AuthUserDTO, error
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println(hash)
 
 	users, err := s.userProvider.GetHashedPassword(userDTO.LoginOrEmail, hash)
 	if err != nil {

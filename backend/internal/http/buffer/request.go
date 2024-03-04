@@ -52,6 +52,8 @@ func Request(log *slog.Logger, client *redis.Client, cfg *config.Config) http.Ha
 		err = json.Unmarshal(b, &newOrder)
 		if err != nil {
 			log.Error("failed to unmarshal new order", sl.Err(err))
+			responseError(w, r, resp.Error("failed to unmasrshal new order"), http.StatusInternalServerError)
+			return
 		}
 
 		fmt.Println(newOrder)

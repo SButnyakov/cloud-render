@@ -26,7 +26,7 @@ type EditResponse struct {
 }
 
 type UserEditor interface {
-	EditUer(user dto.EditUserDTO) error
+	EditUser(user dto.EditUserDTO) error
 }
 
 func Edit(log *slog.Logger, editor UserEditor) http.HandlerFunc {
@@ -61,7 +61,7 @@ func Edit(log *slog.Logger, editor UserEditor) http.HandlerFunc {
 
 		id := r.Context().Value("uid").(int64)
 
-		err = editor.EditUer(dto.EditUserDTO{
+		err = editor.EditUser(dto.EditUserDTO{
 			Id:       id,
 			Login:    req.Login,
 			Email:    req.Email,

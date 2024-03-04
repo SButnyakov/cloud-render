@@ -11,8 +11,11 @@ type UserInfoResponse struct {
 }
 
 func UserInfo(url string, id int64) (*dto.GetUserDTO, error) {
+	fmt.Println("reerererer")
+	fmt.Println(url)
+	fmt.Println(id)
 	requestURL := fmt.Sprintf(url, id)
-
+	fmt.Println(requestURL)
 	var res UserInfoResponse
 
 	err := get(requestURL, &res)

@@ -6,7 +6,6 @@ import (
 	"cloud-render/internal/lib/sl"
 	"log/slog"
 	"net/http"
-	"time"
 
 	"github.com/go-chi/chi/v5/middleware"
 )
@@ -17,11 +16,11 @@ type GetManyOrdersResponse struct {
 }
 
 type orderResponse struct {
-	Id           int64     `json:"id"`
-	FileName     string    `json:"filename"`
-	CreationDate time.Time `json:"date"`
-	Status       string    `json:"status"`
-	DownloadLink string    `json:"downloadLink,omitempty"`
+	Id           int64  `json:"id"`
+	FileName     string `json:"filename"`
+	CreationDate string `json:"date"`
+	Status       string `json:"status"`
+	DownloadLink string `json:"downloadLink,omitempty"`
 }
 
 type ManyOrdersProvider interface {
@@ -51,7 +50,7 @@ func Orders(log *slog.Logger, orderProvider ManyOrdersProvider) http.HandlerFunc
 			responseOrders[i] = orderResponse{
 				Id:           v.Id,
 				FileName:     v.Filename,
-				CreationDate: v.Date,
+				CreationDate: v.Date.Format("02-01-2006"),
 				Status:       v.OrderStatus,
 				DownloadLink: v.DownloadLink,
 			}
