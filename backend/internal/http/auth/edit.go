@@ -19,7 +19,7 @@ import (
 type EditRequest struct {
 	Login    string `json:"login" validate:"required,min=4,max=15"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=30,regexp="`
+	Password string `json:"password" validate:"required,min=8,max=30"`
 }
 
 type EditResponse struct {
