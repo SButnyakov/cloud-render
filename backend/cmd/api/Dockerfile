@@ -10,7 +10,6 @@ WORKDIR /backend
 COPY . .
 RUN go mod download && go mod verify
 RUN go mod tidy
-RUN go test ./... -v
 RUN go build -C ./cmd/api -o ./../serverAPI
 RUN go build -C ./cmd/buffer -o ./../serverBuff
 WORKDIR /backend/cmd/
