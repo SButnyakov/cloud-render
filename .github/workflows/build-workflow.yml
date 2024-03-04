@@ -22,17 +22,11 @@ jobs:
         run: docker-compose up -d postgres
       - name: test backend
         working-directory: ./backend
-        run: go test ./... -v > test_results
+        run: go test ./... -v
         timeout-minutes: 10
       - name: disable database
         if: always()
         run: docker-compose down
-      - name: upload results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Backend_tests_results
-          path: ./backend/test_results
   backend-build:
     runs-on: self-hosted
     needs: backend-test
