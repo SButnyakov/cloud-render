@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"regexp"
 
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
@@ -18,7 +19,7 @@ import (
 type EditRequest struct {
 	Login    string `json:"login" validate:"required,min=4,max=15"`
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8,max=30"`
+	Password string `json:"password" validate:"required,min=8,max=30,regexp="`
 }
 
 type EditResponse struct {
@@ -49,6 +50,20 @@ func Edit(log *slog.Logger, editor UserEditor) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request body", sl.Err(err))
 			responseError(w, r, resp.Error("failed to decode request"), http.StatusBadRequest)
+			return
+		}
+
+		loginMatch := regexp.MustCompile(`^[A-Za-z0-9]*$`)
+		if !loginMatch.MatchString(req.Login) {
+			log.Error("invalid login", slog.String("login", req.Login))
+			responseError(w, r, resp.Error("invalid login"), http.StatusBadRequest)
+			return
+		}
+
+		passwordMatch := regexp.MustCompile(`^[A-Za-z0-9\d@$!%*#?&]*$`)
+		if !passwordMatch.MatchString(req.Password) {
+			log.Error("invalid password", slog.String("password", req.Password))
+			responseError(w, r, resp.Error("invalid password"), http.StatusBadRequest)
 			return
 		}
 

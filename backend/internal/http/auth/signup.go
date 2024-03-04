@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"regexp"
 
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
@@ -39,6 +40,20 @@ func SignUp(log *slog.Logger, userCreator UserCreator) http.HandlerFunc {
 		if err != nil {
 			log.Error("failed to decode request body", sl.Err(err))
 			responseError(w, r, resp.Error("failed to decode request"), http.StatusBadRequest)
+			return
+		}
+
+		loginMatch := regexp.MustCompile(`^[A-Za-z0-9]*$`)
+		if !loginMatch.MatchString(req.Login) {
+			log.Error("invalid login", slog.String("login", req.Login))
+			responseError(w, r, resp.Error("invalid login"), http.StatusBadRequest)
+			return
+		}
+
+		passwordMatch := regexp.MustCompile(`^[A-Za-z0-9\d@$!%*#?&]*$`)
+		if !passwordMatch.MatchString(req.Password) {
+			log.Error("invalid password", slog.String("password", req.Password))
+			responseError(w, r, resp.Error("invalid password"), http.StatusBadRequest)
 			return
 		}
 

@@ -4,7 +4,6 @@ import (
 	"cloud-render/internal/db/postgres"
 	"cloud-render/internal/lib/config"
 	"database/sql"
-	"fmt"
 	"os"
 	"testing"
 
@@ -28,12 +27,6 @@ func (r *RepositoryTestSuite) SetupSuite() {
 	apiConfigPath := os.Getenv("API_TEST_CONFIG_PATH")
 
 	var err error
-
-	dir, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(dir)
 
 	r.auth.cfg = config.MustLoad(authConfigPath)
 	r.api.cfg = config.MustLoad(apiConfigPath)
