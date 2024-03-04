@@ -18,6 +18,7 @@ import (
 	"github.com/go-redis/redismock/v9"
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOrderService_CreateOrder(t *testing.T) {
@@ -115,6 +116,106 @@ func TestOrderService_UpdateOrderStatus(t *testing.T) {
 		}
 
 		err := orderService.UpdateOrderStatus(dto)
+		assert.Error(t, err)
+	})
+}
+
+func TestOrderService_UpdateOrderImage(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+
+	mockOrderProvider := mocks.NewMockOrderProvider(mockCtrl)
+	mockConfig := &config.Config{
+		OrderStatuses: config.OrderStatuses{
+			Success: "Success",
+		},
+		HTTPServer: config.HTTPServer{
+			Host: "localhost",
+			Port: 8080,
+		},
+	}
+	redisClient, _ := redismock.NewClientMock()
+
+	orderService := service.NewOrderService(mockOrderProvider, nil, nil, "", "", mockConfig, redisClient)
+
+	t.Run("Success", func(t *testing.T) {
+		f, err := os.OpenFile("123/test.blend", os.O_WRONLY|os.O_CREATE, 0666)
+		require.NoError(t, err)
+		require.NotNil(t, f)
+		f.Close()
+
+		file, err := ioutil.TempFile("", "testfile")
+		assert.NoError(t, err)
+		defer os.Remove("123/test.jpg")
+
+		dto := dto.UpdateOrderImageDTO{
+			UserId: "123",
+			Header: &multipart.FileHeader{
+				Filename: "test.jpg",
+			},
+			File: file,
+		}
+
+		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), gomock.Any()).Return(nil)
+		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "test.blend", "http://localhost:8080/123/image/download/test.jpg").Return(nil)
+
+		err = orderService.UpdateOrderImage(dto)
+		assert.NoError(t, err)
+	})
+
+	t.Run("InvalidUserID", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "testfile")
+		assert.NoError(t, err)
+		defer os.Remove("123/test.jpg")
+
+		dto := dto.UpdateOrderImageDTO{
+			UserId: "invalid",
+			Header: &multipart.FileHeader{
+				Filename: "test.jpg",
+			},
+			File: file,
+		}
+
+		err = orderService.UpdateOrderImage(dto)
+		assert.Error(t, err)
+	})
+
+	t.Run("UpdateStatusError", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "testfile")
+		assert.NoError(t, err)
+		defer os.Remove("123/test.jpg")
+
+		dto := dto.UpdateOrderImageDTO{
+			UserId: "123",
+			Header: &multipart.FileHeader{
+				Filename: "test.jpg",
+			},
+			File: file,
+		}
+
+		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), int64(0)).Return(errors.New("error"))
+
+		err = orderService.UpdateOrderImage(dto)
+		assert.Error(t, err)
+	})
+
+	t.Run("UpdateDownloadLinkError", func(t *testing.T) {
+		file, err := ioutil.TempFile("", "testfile")
+		assert.NoError(t, err)
+		defer os.Remove("123/test.jpg")
+
+		dto := dto.UpdateOrderImageDTO{
+			UserId: "123",
+			Header: &multipart.FileHeader{
+				Filename: "test.jpg",
+			},
+			File: file,
+		}
+
+		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), int64(0)).Return(nil)
+		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "test.blend", "http://localhost:8080/123/image/download/test.jpg").Return(errors.New("error"))
+
+		err = orderService.UpdateOrderImage(dto)
 		assert.Error(t, err)
 	})
 }

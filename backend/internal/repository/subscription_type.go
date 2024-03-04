@@ -3,7 +3,6 @@ package repository
 import (
 	"cloud-render/internal/models"
 	"database/sql"
-	"errors"
 	"fmt"
 )
 
@@ -43,9 +42,6 @@ func (st *SubscriptionTypeRepository) GetTypesMap() (map[string]int64, error) {
 
 	rows, err := stmt.Query()
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, fmt.Errorf("%s: execute statement: %w", fn, ErrNoSubscriptionTypes)
-		}
 		return nil, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 	defer rows.Close()
