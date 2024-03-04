@@ -1,12 +1,40 @@
 name: project build workflow
 on: [push, workflow_dispatch]
 jobs:
-  backend-build:
+  backend-test:
     runs-on: self-hosted
     steps:
       - name: pull req
         uses: actions/checkout@v4
-      - name: installing go
+      - name: installing go dependencies
+        working-directory: ./backend
+        run: go mod download 1> /dev/null && go mod verify 1> /dev/null
+      - name: uploading dependencies
+        working-directory: ./backend
+        run: go mod tidy 1> /dev/null
+      - name: add env variables
+        working-directory: ./backend
+        run: export AUTH_TEST_CONFIG_PATH = $PWD/config/local_auth_test.yaml && export API_TEST_CONFIG_PATH = $PWD/config/local_api_test.yaml
+      - name: run database
+        run: docker-compose up postgres
+      - name: test backend
+        working-directory: ./backend
+        run: go test ./... -v > test_results
+        timeout-minutes: 10
+      - name: disable database
+        run: docker-compose down
+      - name: upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: Backend_tests_results
+          path: test_results
+  backend-build:
+    runs-on: self-hosted
+    needs: backend-test
+    steps:
+      - name: pull req
+        uses: actions/checkout@v4
+      - name: installing go dependencies
         working-directory: ./backend
         run: go mod download 1> /dev/null && go mod verify 1> /dev/null
       - name: uploading dependencies
