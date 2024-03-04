@@ -14,7 +14,7 @@ jobs:
         run: go mod tidy 1> /dev/null
       - name: add env variables
         working-directory: ./backend
-        run: export AUTH_TEST_CONFIG_PATH = $PWD/config/local_auth_test.yaml && export API_TEST_CONFIG_PATH = $PWD/config/local_api_test.yaml
+        run: export AUTH_TEST_CONFIG_PATH=$PWD/config/local_auth_test.yaml && export API_TEST_CONFIG_PATH=$PWD/config/local_api_test.yaml
       - name: run database
         run: docker-compose up postgres
       - name: test backend
