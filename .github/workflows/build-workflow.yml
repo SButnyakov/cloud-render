@@ -16,7 +16,7 @@ jobs:
         working-directory: ./backend
         run: export AUTH_TEST_CONFIG_PATH=$PWD/config/local_auth_test.yaml && export API_TEST_CONFIG_PATH=$PWD/config/local_api_test.yaml
       - name: run database
-        run: docker-compose up postgres
+        run: docker-compose up postgres -d
       - name: test backend
         working-directory: ./backend
         run: go test ./... -v > test_results
