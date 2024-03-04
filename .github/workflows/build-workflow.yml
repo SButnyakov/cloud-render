@@ -22,8 +22,10 @@ jobs:
         run: go test ./... -v > test_results
         timeout-minutes: 10
       - name: disable database
+        if: always()
         run: docker-compose down
       - name: upload results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Backend_tests_results
