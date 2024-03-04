@@ -102,6 +102,7 @@ type OrderStatuses struct {
 
 func MustLoad(configPath string) *Config {
 	if _, err := os.Stat(configPath); err != nil {
+		log.Println(configPath)
 		log.Fatalf("error opening config file: %s", err)
 	}
 
