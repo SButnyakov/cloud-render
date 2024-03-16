@@ -244,6 +244,8 @@ const ProfilePage = observer(() => {
     })
   }
 
+  console.log(errorList)
+
   return(
     <div className={styles.profilePage}>
 
@@ -252,16 +254,19 @@ const ProfilePage = observer(() => {
         (<div className={styles.formContainer}>
           <form className={styles.profileForm} onSubmit={handleSubmit(onSubmit)}>
             <h2>Your Profile</h2>
-            <div className={styles.formGroup}>
-              Email: <div>{user.email}</div>
+            <div className={styles.userData}>
+              <div className={styles.formGroup}>
+                Email: <div>{user.email}</div>
+              </div>
+              <div className={styles.formGroup}>
+                Login: <div>{user.login}</div>
+              </div>
+              <div className={styles.formGroup} style={{visibility: user.expirationDate ? 'visible' : 'hidden'}}>
+                Sub expire date: <div>{user.expirationDate}</div>
+              </div>
             </div>
-            <div className={styles.formGroup}>
-              Login: <div>{user.login}</div>
-            </div>
-            <div className={styles.formGroup} style={{visibility: user.expirationDate !== '01-01-0001' ? 'visible' : 'hidden'}}>
-              Sub expire date: <div>{user.expirationDate}</div>
-            </div>
-            <div className={styles.formActions} style={{marginTop: '125px'}}>
+            
+            <div className={styles.formActions}>
               <button type="button" className={styles.cancelButton} onClick={() => openModalSub()}>
                 Buy subscription
               </button>
@@ -275,59 +280,67 @@ const ProfilePage = observer(() => {
         (<div className={styles.formContainer}>
           <form className={styles.profileForm} onSubmit={handleSubmit(onSubmit)}>
             <h2>Your Profile</h2>
-            <div className={styles.formGroup}>
-              Email: <input type="text" 
-                    id="email"
-                    {...register('email', {
-                      required: 'Input email',
-                      value: user.email,
-                      pattern: {
-                        value: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
-                        message:
-                          'Wrong email format!',
-                      },
-                    })} />
-            </div>
-            <div className={styles.formGroup}>
-              Login: <input type="text" 
-                    id="login"
-                    {...register('login', {
-                      required: 'Input Login',
-                      value: user.login,
-                      pattern: {
-                        value: /^[a-zA-Z0-9]{4,15}$/,
-                        message:
-                          'The login must contain Latin letters and have a maximum length of 15 characters',
-                      },
-                    })} />
-            </div>
-            <div className={styles.formGroup}>
-              Password:
-              <input
-                type="text" 
-                id="password"
-                {...register('password', {
-                  required: 'Input password'
-                })}
-              />
-            </div>
-            <div className={styles.formGroup}>
-              Confirm Password:
-              <input
-                type="text" 
-                id="password_repeat"
-                {...register('passwordRepeat', {
-                  required: 'Repeat password'
-                })}
-              />
-            </div>
-            <div className={styles.errorBlockMessage}>
-                  {errorList.map(el => {
-                  return <p>{el && el.message}</p> 
+            <div className={styles.userData}>
+              <div className={styles.formGroup}>
+                Email: <input type="text" 
+                      id="email"
+                      {...register('email', {
+                        required: 'Input email',
+                        value: user.email,
+                        pattern: {
+                          value: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
+                          message:
+                            'Wrong email format!',
+                        },
+                      })} />
+              </div>
+              <div className={styles.formGroup}>
+                Login: <input type="text" 
+                      id="login"
+                      {...register('login', {
+                        required: 'Input Login',
+                        value: user.login,
+                        pattern: {
+                          value: /^[a-zA-Z0-9]{4,15}$/,
+                          message:
+                            'The login must contain Latin letters and have a maximum length of 15 characters',
+                        },
+                      })} />
+              </div>
+              <div className={styles.formGroup}>
+                Password:
+                <input
+                  type="text" 
+                  id="password"
+                  {...register('password', {
+                    required: 'Input password'
                   })}
-    
-                  {extraErrors ?? null}
-                </div>
+                />
+              </div>
+              <div className={styles.formGroup}>
+                Confirm Password:
+                <input
+                  type="text" 
+                  id="password_repeat"
+                  {...register('passwordRepeat', {
+                    required: 'Repeat password'
+                  })}
+                />
+              </div>
+
+              <div className={styles.errorBlockMessage}>
+                {errorList.map((el, index) => {
+                  return <p key={index}>{el && el.message}</p> 
+                  })
+                }
+
+                <p>{extraErrors ?? null}</p>
+              </div>
+
+            </div>
+
+            
+            
             <div className={styles.formActions}>
               <button type="button" className={styles.cancelButton} onClick={() => handleSetIsEditStatus(false)}>
                 Cancel

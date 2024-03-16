@@ -66,7 +66,7 @@ export const SigninForm = observer(() => {
 
         <div>
           <input 
-            name="password" 
+            name="password"
             type="password" 
             value={password}
             placeholder="Password"

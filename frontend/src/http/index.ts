@@ -45,13 +45,13 @@ const invalidTokenInterceptor = async (error: any) => {
 
 const validTokenInterceptor = (config: any) => config
 
-$authHost.interceptors.request.use(authInterceptor)
+$authHost?.interceptors.request.use(authInterceptor)
 
-$authHost.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
+$authHost?.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
 
-$bufferHost.interceptors.request.use(authInterceptor)
+$bufferHost?.interceptors.request.use(authInterceptor)
 
-$bufferHost.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
+$bufferHost?.interceptors.response.use(validTokenInterceptor, invalidTokenInterceptor)
 
 export {
   $host,
