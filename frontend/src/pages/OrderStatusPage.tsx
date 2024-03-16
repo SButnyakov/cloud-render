@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import styles from './styles/OrderStatusPage.module.css'
 import { downloadOrder, getOrder } from "../http/OrdersAPI";
 
 const OrderStatusPage = () => {
   const params = useParams()
+  const router = useNavigate()
 
   const [orderState, setOrderState] = useState<string | undefined>('')
   const [downloadLink, setDownloadLink] = useState('')
@@ -17,6 +18,9 @@ const OrderStatusPage = () => {
       .then(res => {
         setOrderState((res as any).order_status)
         setDownloadLink((res as any).download_link)
+      })
+      .catch((e) => {
+        router('/')
       })
   })
 
