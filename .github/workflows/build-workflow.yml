@@ -35,10 +35,10 @@ jobs:
       - name: Install Node.js
         uses: actions/setup-node@v4
         with:
-            node-version: '16.x'
+            node-version: '20.x'
       - name: installing local dependencies
         working-directory: ./frontend
-        run: npm ci 1> /dev/null
+        run: npm ci --legacy-peer-deps 1> /dev/null
         timeout-minutes: 10
       - name: integration tests frontend
         working-directory: ./frontend
