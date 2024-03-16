@@ -1,8 +1,0 @@
-env: "dev"
-db:
-  name: "cloud_render_auth_test"
-  user: "user"
-  password: "password"
-  host: "postgres"
-  port: "5432"
-  migrations_path: "file://../../../migrations/auth/postgres"
