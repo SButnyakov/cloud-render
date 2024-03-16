@@ -1,0 +1,8 @@
+blender_path: "D:\Blende\\blender.exe"
+base_url: "http://localhost:8082"
+sleep_time: 5s
+update_status:
+  in_progress: "in-progress"
+  error: "error"
+response_status:
+  empty: "empty"

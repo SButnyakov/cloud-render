@@ -1,0 +1,33 @@
+env: "local"
+http_server:
+  host: "localhost"
+  port: 8082
+  timeout: 4s
+  idle_timeout: 30s
+db:
+  name: "cloud_render_api"
+  user: "user"
+  password: "password"
+  host: "localhost"
+  port: "5432"
+redis:
+  address: "localhost:6379"
+  password: "password"
+  queue_name: "render-list"
+  priority_queue_name: "subscribed-render-list"
+paths:
+  request: "/request"
+  uid:
+    root: "/{uid}"
+    download: "/download/{filename}"
+    blend:
+      root: "/blend"
+      update: "/update/{filename}/{status}"
+    image:
+      root: "/image"
+      upload: "/upload"
+order_statuses:
+  in_queue: "in queue"
+  in_progress: "in progress"
+  error: "error"
+  success: "success"

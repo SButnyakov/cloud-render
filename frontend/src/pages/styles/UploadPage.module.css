@@ -1,0 +1,163 @@
+.uploadPage {
+  display: flex;
+  flex-direction: row;
+  height: 657px;
+  align-items: center;
+  
+  margin-left: 50px;
+}
+
+.optionBlock {
+  display: flex;
+  flex-direction: column;
+  background-color: #F0FAFF;
+
+  height: 150px;
+  width: 200px;
+
+  align-items: stretch;
+  justify-content: space-between;
+
+  border-radius: 15px;
+
+  padding: 10px;
+
+  margin-top: 15px;
+  box-shadow: 0 2px 5px rgba(83, 83, 83, 0.26);
+}
+
+.optionBlock select {
+  padding: 10px;
+  border: 1px solid #CCC;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-left: 5px;
+}
+
+.optionBlock p {
+  margin-left: 5px;
+}
+
+.optionBlock button .inactive {
+  border: none;
+  color: white;
+  background-color: #BCA9FF;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 15px;
+}
+
+.uploadField {
+  width: 600px;
+  height: 300px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 15px;
+
+  background-color: #F0FAFF;
+  border-style:ridge;
+
+  border-width: 2px;
+  border-color: #8C6CF3;
+
+  font-size: 40px;
+
+  box-shadow: 0 2px 5px rgba(83, 83, 83, 0.26);
+}
+
+.uploadField input {
+  display: none;
+}
+
+.dropButton {
+  border: none;
+  color: white;
+  background-color: #8C6CF3;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 15px;
+}
+
+.errorBlock {
+  color: red;
+}
+
+.scene {
+  position: absolute;
+}
+
+.optionGear {
+  display: flex;
+  background-color: #F0FAFF;
+  font-size: 30px;
+  height: 50px;
+  width: 50px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 2px 5px rgba(83, 83, 83, 0.26);
+
+  border-radius: 100px;
+  padding: 10px;
+}
+
+.preferencesBlock {
+  display: flex;
+  flex-direction: column;
+
+  height: 600px;
+  justify-content: space-between;
+
+  margin-left: 50px;
+}
+
+.controlsBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.controlsBlock button {
+  border: none;
+  color: white;
+  background-color: #8C6CF3;
+  padding: 10px 20px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 15px;
+
+  margin-top: 15px;
+}
+
+.uploadBlock {
+  display: flex;
+  flex-direction: column;
+}
+
+.actionsBlock {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actionsBlock p {
+  color: red;
+  font-size: 18px;
+}
+
+.actionsBlock button {
+  border: none;
+  color: white;
+  background-color: #ccc0f4;
+  padding: 10px 20px;
+  text-transform: uppercase;
+
+  border-radius: 15px;
+  margin: 10px;
+}

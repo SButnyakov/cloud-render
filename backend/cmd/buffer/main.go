@@ -1,0 +1,148 @@
+package main
+
+import (
+	"cloud-render/internal/db/postgres"
+	"cloud-render/internal/db/redis"
+	"cloud-render/internal/http/buffer"
+	"cloud-render/internal/http/middleware/cors"
+	mwLogger "cloud-render/internal/http/middleware/logger"
+	"cloud-render/internal/lib/config"
+	"cloud-render/internal/lib/sl"
+	"cloud-render/internal/repository"
+	"cloud-render/internal/service"
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+)
+
+func main() {
+	// Envs
+	cfgPath := os.Getenv("BUFFER_CONFIG_PATH")
+	// jwtSecretKey := os.Getenv("JWT_SECRET_KEY")
+	inputPath := os.Getenv("FILES_INPUT_PATH")
+	outputPath := os.Getenv("FILES_OUTPUT_PATH")
+
+	// Config
+	cfg := config.MustLoad(cfgPath)
+
+	// Logger
+	log := sl.SetupLogger(cfg.Env)
+	log = log.With(slog.String("env", cfg.Env))
+	log.Info("initializing server", slog.String("host", cfg.HTTPServer.Host), slog.Int("port", cfg.HTTPServer.Port))
+	log.Debug("logger debug mode enabled")
+
+	// DB
+	pg, err := postgres.New(cfg.DB)
+	if err != nil {
+		log.Error("failed to initialize storage", sl.Err(err))
+		os.Exit(-1)
+	}
+	defer pg.Close()
+
+	// Redis
+	client, err := redis.New(cfg)
+	if err != nil {
+		log.Error("failed to initialize redis", sl.Err(err))
+		os.Exit(-1)
+	}
+	defer client.Close()
+
+	/*
+		// JWT manager
+		jwtManager, err := tokenManager.New(jwtSecretKey)
+		if err != nil {
+			log.Error("failed to initialize jwt token manager", sl.Err(err))
+			os.Exit(-1)
+		}
+	*/
+
+	time.Sleep(time.Second * 10)
+
+	// Static repos
+	orderStatusRepository := repository.NewOrderStatusRepository(pg)
+
+	// Static maps
+	orderStatusesStrToInt, err := orderStatusRepository.GetStatusesMapStringToInt()
+	if err != nil {
+		log.Error("failed to get order statuses str to int", sl.Err(err))
+		os.Exit(-1)
+	}
+	orderStatusesIntToStr, err := orderStatusRepository.GetStatusesMapIntToString()
+	if err != nil {
+		log.Error("failed to get order statuses int to str", sl.Err(err))
+		os.Exit(-1)
+	}
+
+	// Dynamic repos
+	orderRepository := repository.NewOrderRepository(pg)
+
+	// Services
+	orderService := service.NewOrderService(orderRepository, orderStatusesStrToInt, orderStatusesIntToStr,
+		inputPath, outputPath, cfg, client)
+
+	// Router
+	router := chi.NewRouter()
+
+	// Router middleware
+	router.Use(middleware.RequestID)
+	router.Use(mwLogger.New(log))
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
+	router.Use(cors.New())
+
+	// Router handlers
+	router.Get("/request", buffer.Request(log, client, cfg))
+	router.Route("/{uid}", func(uidRouter chi.Router) {
+		uidRouter.Route("/blend", func(blendRouter chi.Router) {
+			blendRouter.Get("/download/{filename}", buffer.Download(log, inputPath))
+			blendRouter.Put("/update/{filename}/{status}", buffer.Update(log, orderService))
+		})
+		uidRouter.Route("/image", func(imageRouter chi.Router) {
+			imageRouter.Post("/upload", buffer.Upload(log, orderService))
+			imageRouter.Route("/", func(authImageRouter chi.Router) {
+				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
+			})
+		})
+	})
+
+	// Server
+	httpServer := http.Server{
+		Addr:         fmt.Sprintf("%s:%d", cfg.HTTPServer.Host, cfg.HTTPServer.Port),
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	// Startup
+	interrupt := make(chan os.Signal)
+	signal.Notify(interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	log.Info("starting server", slog.String("address", httpServer.Addr))
+	go func() {
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Error("server error.", sl.Err(err))
+			os.Exit(1)
+		}
+	}()
+
+	<-interrupt
+	log.Info("stopping server")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := httpServer.Shutdown(ctx); err != nil {
+		log.Error("server shutdown failed.", sl.Err(err))
+		os.Exit(1)
+	}
+}
