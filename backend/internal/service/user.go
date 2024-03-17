@@ -73,11 +73,16 @@ func (s *UserService) GetUser(id int64) (*dto.GetUserDTO, error) {
 }
 
 func (s *UserService) EditUser(userDTO dto.EditUserDTO) error {
-	err := s.userProvider.UpdateUser(models.User{
+	hash, err := password.HashPassword(userDTO.Password)
+	if err != nil {
+		return err
+	}
+
+	err = s.userProvider.UpdateUser(models.User{
 		Id:       userDTO.Id,
 		Login:    userDTO.Login,
 		Email:    userDTO.Email,
-		Password: userDTO.Password,
+		Password: hash,
 	})
 	if err != nil {
 		if errors.Is(err, repository.ErrUserNotFound) {
