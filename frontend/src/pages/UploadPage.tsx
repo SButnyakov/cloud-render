@@ -194,7 +194,6 @@ const UploadPage = observer(() => {
 
               <p>Resolution:</p>
               <select
-                placeholder="resolution" 
                 value={resolutionSettings} 
                 onChange={(e) => setResolutionSettings(e.target.value)}
               >
