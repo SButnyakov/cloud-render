@@ -67,7 +67,7 @@ jobs:
       - name: run project
         run: docker-compose up -d
       - name: integration testing backend
-        working-directory: ./backend/cmd/tests/integration
+        working-directory: ./backend/cmd/tests/intergration
         run: go test ./... -v
         timeout-minutes: 10
       - name: disable project
