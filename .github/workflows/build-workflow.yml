@@ -39,9 +39,11 @@ jobs:
         run: echo "API_CONFIG_PATH=$PWD/config/local_api.yaml" >> "$GITHUB_ENV"
       - name: add env variable for buffer
         working-directory: ./backend
-        run: echo "BUFFER_CONFIG_PATH=$PWD/config/local_buffer.yaml" >> "$GITHUB_ENV"
+        run: echo "BUFFER_CONFIG_PATH=$PWD/config/dev_buffer.yaml" >> "$GITHUB_ENV"
       - name: run project
-        run: docker-compose up -d
+        run: |
+            docker-compose up -d
+            sleep 10
       - name: integration testing backend
         working-directory: ./backend/cmd/tests/intergration
         run: go run main.go
