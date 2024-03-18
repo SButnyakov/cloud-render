@@ -48,7 +48,7 @@ jobs:
         timeout-minutes: 10
   backend-integration-test:
     runs-on: self-hosted
-    needs: backend-module-test
+    needs: docker-build
     steps:
       - name: pull req
         uses: actions/checkout@v4
