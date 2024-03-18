@@ -422,7 +422,7 @@ func (s *InegrationTestsSuite) TestSubscribeUser() (bool, string, error) {
 		return false, fmt.Sprintf("invalid email. expected: %s, actual: %s", email, userResponse.Email), nil
 	}
 	if userResponse.ExpireDate != nil {
-		return false, fmt.Sprintf("invalid exp date. expected: %s, actual: %s", nil, *userResponse.ExpireDate), nil
+		return false, fmt.Sprintf("invalid exp date. expected: %T, actual: %s", nil, *userResponse.ExpireDate), nil
 	}
 
 	// Subscribe
