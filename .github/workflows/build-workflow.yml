@@ -60,10 +60,10 @@ jobs:
         run: go mod tidy 1> /dev/null
       - name: add env variable for auth
         working-directory: ./backend
-        run: echo "AUTH_TEST_CONFIG_PATH=$PWD/config/local_auth_test.yaml" >> "$GITHUB_ENV"
+        run: echo "AUTH_TEST_CONFIG_PATH=$PWD/config/dev_auth.yaml" >> "$GITHUB_ENV"
       - name: add env variable for api
         working-directory: ./backend
-        run: echo "API_TEST_CONFIG_PATH=$PWD/config/local_api_test.yaml" >> "$GITHUB_ENV"
+        run: echo "API_TEST_CONFIG_PATH=$PWD/config/dev_api.yaml" >> "$GITHUB_ENV"
       - name: run project
         run: docker-compose up -d
       - name: integration testing backend
