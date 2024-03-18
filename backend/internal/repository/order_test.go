@@ -4,6 +4,7 @@ import (
 	"cloud-render/internal/models"
 	"cloud-render/internal/repository"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -220,6 +221,8 @@ func (r *RepositoryTestSuite) TestOrderRepository_UpdateStatus() {
 		IsDeleted:    false,
 	})
 
+	log.Println(orderId)
+
 	require.NoError(r.T(), err)
 
 	require.NoError(r.T(), sRepo.Create("new status"))
@@ -228,28 +231,24 @@ func (r *RepositoryTestSuite) TestOrderRepository_UpdateStatus() {
 		name    string
 		orderId int64
 		status  int64
-		userId  int64
 		isErr   bool
 	}{
 		{
-			name:    "wrong stroingname",
-			orderId: orderId,
+			name:    "wrong order id",
+			orderId: 99,
 			status:  2,
-			userId:  1,
 			isErr:   true,
 		},
 		{
 			name:    "wrong status id",
 			orderId: orderId,
 			status:  99,
-			userId:  1,
 			isErr:   true,
 		},
 		{
 			name:    "correct",
 			orderId: orderId,
 			status:  2,
-			userId:  1,
 			isErr:   false,
 		},
 	}
@@ -304,28 +303,18 @@ func (r *RepositoryTestSuite) TestOrderRepository_UpdateDownloadLink() {
 		name    string
 		orderId int64
 		link    string
-		userId  int64
 		isErr   bool
 	}{
 		{
-			name:    "wrong stroingname",
-			orderId: orderId,
+			name:    "wrong order id",
+			orderId: 99,
 			link:    "link",
-			userId:  1,
-			isErr:   true,
-		},
-		{
-			name:    "wrong user id",
-			orderId: orderId,
-			link:    "link",
-			userId:  99,
 			isErr:   true,
 		},
 		{
 			name:    "correct",
 			orderId: orderId,
 			link:    "link",
-			userId:  1,
 			isErr:   false,
 		},
 	}

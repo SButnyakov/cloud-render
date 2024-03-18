@@ -21,6 +21,10 @@ func main() {
 	apiCfgPath := os.Getenv("API_CONFIG_PATH")
 	bufferCfgPath := os.Getenv("BUFFER_CONFIG_PATH")
 
+	log.Println("AUTH_CONFIG_PATH")
+	log.Println("API_CONFIG_PATH")
+	log.Println("BUFFER_CONFIG_PATH")
+
 	authCfg := config.MustLoad(authCfgPath)
 	apiCfg := config.MustLoad(apiCfgPath)
 	bufferCfg := config.MustLoad(bufferCfgPath)
