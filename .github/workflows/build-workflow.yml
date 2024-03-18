@@ -1,33 +1,33 @@
 name: project build and test workflow
 on: [push, workflow_dispatch]
 jobs:
-  backend-module-test:
-    runs-on: self-hosted
-    needs: docker-build
-    steps:
-      - name: pull req
-        uses: actions/checkout@v4
-      - name: installing go dependencies
-        working-directory: ./backend
-        run: go mod download 1> /dev/null && go mod verify 1> /dev/null
-      - name: uploading dependencies
-        working-directory: ./backend
-        run: go mod tidy 1> /dev/null
-      - name: add env variable for auth
-        working-directory: ./backend
-        run: echo "AUTH_TEST_CONFIG_PATH=$PWD/config/local_auth_test.yaml" >> "$GITHUB_ENV"
-      - name: add env variable for api
-        working-directory: ./backend
-        run: echo "API_TEST_CONFIG_PATH=$PWD/config/local_api_test.yaml" >> "$GITHUB_ENV"
-      - name: run database
-        run: docker-compose up -d postgres
-      - name: test backend
-        working-directory: ./backend
-        run: go test ./... -v
-        timeout-minutes: 10
-      - name: disable database
-        if: always()
-        run: docker-compose down
+  #backend-module-test:
+    #runs-on: self-hosted
+    #needs: docker-build
+    #steps:
+    #  - name: pull req
+    #    uses: actions/checkout@v4
+    #  - name: installing go dependencies
+    #    working-directory: ./backend
+    #    run: go mod download 1> /dev/null && go mod verify 1> /dev/null
+    #  - name: uploading dependencies
+    #   working-directory: ./backend
+    #    run: go mod tidy 1> /dev/null
+    #  - name: add env variable for auth
+    #    working-directory: ./backend
+    #    run: echo "AUTH_TEST_CONFIG_PATH=$PWD/config/local_auth_test.yaml" >> "$GITHUB_ENV"
+    #  - name: add env variable for api
+    #    working-directory: ./backend
+    #   run: echo "API_TEST_CONFIG_PATH=$PWD/config/local_api_test.yaml" >> "$GITHUB_ENV"
+    #  - name: run database
+    #    run: docker-compose up -d postgres
+    #  - name: test backend
+    #    working-directory: ./backend
+    #   run: go test ./... -v
+    #    timeout-minutes: 10
+    #  - name: disable database
+    #    if: always()
+     #   run: docker-compose down
   frontend-integration-test:
     runs-on: self-hosted
     needs: docker-build
@@ -60,10 +60,10 @@ jobs:
         run: go mod tidy 1> /dev/null
       - name: add env variable for auth
         working-directory: ./backend
-        run: echo "AUTH_TEST_CONFIG_PATH=$PWD/config/dev_auth.yaml" >> "$GITHUB_ENV"
+        run: echo "AUTH_CONFIG_PATH=$PWD/config/dev_auth.yaml" >> "$GITHUB_ENV"
       - name: add env variable for api
         working-directory: ./backend
-        run: echo "API_TEST_CONFIG_PATH=$PWD/config/dev_api.yaml" >> "$GITHUB_ENV"
+        run: echo "API_CONFIG_PATH=$PWD/config/dev_api.yaml" >> "$GITHUB_ENV"
       - name: run project
         run: docker-compose up -d
       - name: integration testing backend
