@@ -18,7 +18,7 @@ redis:
   priority_queue_name: "subscribed-render-list"
 paths:
   user: "/user"
-  subscribe: "/susbcribe"
+  subscribe: "/subscribe"
   send: "/send"
   orders:
     root: "/orders"

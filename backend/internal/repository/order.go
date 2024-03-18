@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 )
 
 type OrderRepository struct {
@@ -16,21 +15,23 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-func (o *OrderRepository) Create(order models.Order) error {
+func (o *OrderRepository) Create(order models.Order) (int64, error) {
 	const fn = packagePath + "order.Create"
 
 	stmt, err := o.db.Prepare("INSERT INTO orders (filename, storingname, creation_date, user_id, status_id, is_deleted) VALUES ($1, $2, $3, $4, $5, $6)")
 	if err != nil {
-		return fmt.Errorf("%s: prepare statement: %w", fn, err)
+		return 0, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(order.FileName, order.StoringName, order.CreationDate, order.UserId, order.StatusId, false)
+	res, err := stmt.Exec(order.FileName, order.StoringName, order.CreationDate, order.UserId, order.StatusId, false)
 	if err != nil {
-		return fmt.Errorf("%s: execute statement: %w", fn, err)
+		return 0, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
 
-	return nil
+	lastInsertedId, _ := res.LastInsertId()
+
+	return lastInsertedId, nil
 }
 
 func (o *OrderRepository) GetOne(id int64) (*models.Order, error) {
@@ -84,16 +85,16 @@ func (o *OrderRepository) GetMany(id int64) ([]models.Order, error) {
 	return orders, nil
 }
 
-func (o *OrderRepository) UpdateStatus(storingName string, uid, statusId int64) error {
+func (o *OrderRepository) UpdateStatus(orderId, statusId int64) error {
 	const fn = packagePath + "order.UpdateStatus"
 
-	stmt, err := o.db.Prepare("UPDATE orders SET status_id = $3 WHERE user_id = $1 AND storingname = $2")
+	stmt, err := o.db.Prepare("UPDATE orders SET status_id = $2 WHERE id = $1")
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(uid, storingName, statusId)
+	res, err := stmt.Exec(orderId, statusId)
 	if err != nil {
 		return fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
@@ -110,19 +111,16 @@ func (o *OrderRepository) UpdateStatus(storingName string, uid, statusId int64) 
 	return nil
 }
 
-func (o *OrderRepository) UpdateDownloadLink(uid int64, storingName, downloadLink string) error {
+func (o *OrderRepository) UpdateDownloadLink(orderId int64, downloadLink string) error {
 	const fn = packagePath + "order.UpdateDownloadLink"
 
-	stmt, err := o.db.Prepare("UPDATE orders SET download_link = $3 WHERE user_id = $1 AND storingname = $2")
+	stmt, err := o.db.Prepare("UPDATE orders SET download_link = $2 WHERE id = $1")
 	if err != nil {
 		return fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 	defer stmt.Close()
 
-	log.Println(uid)
-	log.Println(storingName)
-
-	res, err := stmt.Exec(uid, storingName, downloadLink)
+	res, err := stmt.Exec(orderId, downloadLink)
 	if err != nil {
 		return fmt.Errorf("%s: execute statement: %w", fn, err)
 	}

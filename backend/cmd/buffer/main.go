@@ -104,10 +104,10 @@ func main() {
 	router.Route("/{uid}", func(uidRouter chi.Router) {
 		uidRouter.Route("/blend", func(blendRouter chi.Router) {
 			blendRouter.Get("/download/{filename}", buffer.Download(log, inputPath))
-			blendRouter.Put("/update/{filename}/{status}", buffer.Update(log, orderService))
+			blendRouter.Put("/update/{id}/{status}", buffer.Update(log, orderService))
 		})
 		uidRouter.Route("/image", func(imageRouter chi.Router) {
-			imageRouter.Post("/upload", buffer.Upload(log, orderService))
+			imageRouter.Post("/{id}/upload", buffer.Upload(log, orderService))
 			imageRouter.Route("/", func(authImageRouter chi.Router) {
 				authImageRouter.Get("/download/{filename}", buffer.Download(log, outputPath))
 			})

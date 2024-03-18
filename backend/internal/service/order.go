@@ -31,11 +31,11 @@ type OrderService struct {
 }
 
 type OrderProvider interface {
-	Create(order models.Order) error
+	Create(order models.Order) (int64, error)
 	GetOne(id int64) (*models.Order, error)
 	GetMany(id int64) ([]models.Order, error)
-	UpdateStatus(storingName string, uid, statusId int64) error
-	UpdateDownloadLink(id int64, storingName, downloadLink string) error
+	UpdateStatus(orderId, statusId int64) error
+	UpdateDownloadLink(orderId int64, downloadLink string) error
 	SoftDelete(id int64) error
 }
 
@@ -78,7 +78,7 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 		return fmt.Errorf("failed to write into file: %w", err)
 	}
 
-	err = s.orderProvider.Create(models.Order{
+	orderId, err := s.orderProvider.Create(models.Order{
 		FileName:     dto.Header.Filename,
 		StoringName:  storingName,
 		CreationDate: time.Now(),
@@ -91,6 +91,7 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 	}
 
 	b, err := json.Marshal(models.RedisData{
+		OrderId:    orderId,
 		Format:     dto.Format,
 		Resolution: dto.Resolution,
 		SavePath:   savePath,
@@ -99,7 +100,6 @@ func (s *OrderService) CreateOrder(dto dto.CreateOrderDTO) error {
 		return fmt.Errorf("failed to create new redis record: %w", err)
 	}
 
-	fmt.Println(string(b))
 	s.redis.RPush(context.Background(), s.cfg.Redis.QueueName, string(b))
 
 	return nil
@@ -125,19 +125,14 @@ func (s *OrderService) UpdateOrderImage(dto dto.UpdateOrderImageDTO) error {
 		return err
 	}
 
-	id, err := strconv.ParseInt(dto.UserId, 10, 64)
-	if err != nil {
-		return err
-	}
-
-	err = s.orderProvider.UpdateStatus(strings.Split(dto.Header.Filename, ".")[0]+".blend", int64(id), s.statusesStrToInt[s.cfg.OrderStatuses.Success])
+	err = s.orderProvider.UpdateStatus(dto.OrderId, s.statusesStrToInt[s.cfg.OrderStatuses.Success])
 	if err != nil {
 		return err
 	}
 
 	downloadLink := fmt.Sprintf("http://%s:%d/%s/image/download/%s", s.cfg.HTTPServer.Host, s.cfg.HTTPServer.Port, dto.UserId, dto.Header.Filename)
 
-	err = s.orderProvider.UpdateDownloadLink(int64(id), strings.Split(dto.Header.Filename, ".")[0]+".blend", downloadLink)
+	err = s.orderProvider.UpdateDownloadLink(dto.OrderId, downloadLink)
 	if err != nil {
 		return err
 	}
@@ -194,7 +189,7 @@ func (s *OrderService) GetManyOrders(id int64) ([]dto.GetOrderDTO, error) {
 }
 
 func (s *OrderService) UpdateOrderStatus(dto dto.UpdateOrderStatusDTO) error {
-	err := s.orderProvider.UpdateStatus(dto.StoringName, dto.UserId, s.statusesStrToInt[dto.Status])
+	err := s.orderProvider.UpdateStatus(dto.OrderId, s.statusesStrToInt[dto.Status])
 	if err != nil {
 		return err
 	}

@@ -45,9 +45,8 @@ func TestUpdateHandler(t *testing.T) {
 			wantBody: "{\"status\":\"OK\"}\n",
 			mock: mockOrderStatusUpdater.EXPECT().
 				UpdateOrderStatus(dto.UpdateOrderStatusDTO{
-					UserId:      int64(1),
-					StoringName: "test_file.txt",
-					Status:      "status",
+					OrderId: int64(1),
+					Status:  "status",
 				}).
 				Return(nil).
 				Times(1),
@@ -69,9 +68,8 @@ func TestUpdateHandler(t *testing.T) {
 			wantBody: "{\"status\":\"Error\",\"error\":\"failed to update status\"}\n",
 			mock: mockOrderStatusUpdater.EXPECT().
 				UpdateOrderStatus(dto.UpdateOrderStatusDTO{
-					UserId:      int64(1),
-					StoringName: "test_file.txt",
-					Status:      "status",
+					OrderId: int64(1),
+					Status:  "status",
 				}).
 				Return(errors.New("any")).
 				Times(1),

@@ -95,24 +95,22 @@ func TestOrderService_UpdateOrderStatus(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		dto := dto.UpdateOrderStatusDTO{
-			UserId:      int64(123),
-			StoringName: "test.jpg",
-			Status:      "InQueue",
+			OrderId: int64(1),
+			Status:  "InQueue",
 		}
 
-		mockOrderProvider.EXPECT().UpdateStatus("test.jpg", int64(123), int64(1)).Return(nil)
+		mockOrderProvider.EXPECT().UpdateStatus(int64(1), int64(1)).Return(nil)
 
 		err := orderService.UpdateOrderStatus(dto)
 		assert.NoError(t, err)
 	})
 
 	t.Run("OrderProviderError", func(t *testing.T) {
-		mockOrderProvider.EXPECT().UpdateStatus("test.jpg", int64(123), int64(1)).Return(errors.New("error"))
+		mockOrderProvider.EXPECT().UpdateStatus(int64(1), int64(1)).Return(errors.New("error"))
 
 		dto := dto.UpdateOrderStatusDTO{
-			UserId:      int64(123),
-			StoringName: "test.jpg",
-			Status:      "InQueue",
+			OrderId: int64(1),
+			Status:  "InQueue",
 		}
 
 		err := orderService.UpdateOrderStatus(dto)
@@ -156,8 +154,8 @@ func TestOrderService_UpdateOrderImage(t *testing.T) {
 			File: file,
 		}
 
-		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), gomock.Any()).Return(nil)
-		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "test.blend", "http://localhost:8080/123/image/download/test.jpg").Return(nil)
+		mockOrderProvider.EXPECT().UpdateStatus(int64(1), int64(1)).Return(nil)
+		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "http://localhost:8080/123/image/download/test.jpg").Return(nil)
 
 		err = orderService.UpdateOrderImage(dto)
 		assert.NoError(t, err)
@@ -193,7 +191,7 @@ func TestOrderService_UpdateOrderImage(t *testing.T) {
 			File: file,
 		}
 
-		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), int64(0)).Return(errors.New("error"))
+		mockOrderProvider.EXPECT().UpdateStatus(int64(1), int64(1)).Return(errors.New("error"))
 
 		err = orderService.UpdateOrderImage(dto)
 		assert.Error(t, err)
@@ -212,8 +210,8 @@ func TestOrderService_UpdateOrderImage(t *testing.T) {
 			File: file,
 		}
 
-		mockOrderProvider.EXPECT().UpdateStatus("test.blend", int64(123), int64(0)).Return(nil)
-		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "test.blend", "http://localhost:8080/123/image/download/test.jpg").Return(errors.New("error"))
+		mockOrderProvider.EXPECT().UpdateStatus(int64(1), int64(1)).Return(nil)
+		mockOrderProvider.EXPECT().UpdateDownloadLink(int64(123), "http://localhost:8080/123/image/download/test.jpg").Return(errors.New("error"))
 
 		err = orderService.UpdateOrderImage(dto)
 		assert.Error(t, err)

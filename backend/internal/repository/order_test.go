@@ -77,10 +77,11 @@ func (r *RepositoryTestSuite) TestOrderRepository_Create() {
 	}
 
 	for _, t := range tests {
+		_, err = repo.Create(t.input)
 		if t.isErr {
-			assert.Error(r.T(), repo.Create(t.input), t.name)
+			assert.Error(r.T(), err, t.name)
 		} else {
-			assert.NoError(r.T(), repo.Create(t.input), t.name)
+			assert.NoError(r.T(), err, t.name)
 		}
 	}
 
@@ -111,14 +112,16 @@ func (r *RepositoryTestSuite) TestOrderRepository_GetOne() {
 
 	testTime := time.Now()
 
-	require.NoError(r.T(), repo.Create(models.Order{
+	_, err = repo.Create(models.Order{
 		FileName:     "filename",
 		StoringName:  "storingname",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
+	})
+
+	require.NoError(r.T(), err)
 
 	order, err = repo.GetOne(1)
 	require.NoError(r.T(), err)
@@ -146,22 +149,27 @@ func (r *RepositoryTestSuite) TestOrderRepository_GetMany() {
 
 	testTime := time.Now()
 
-	require.NoError(r.T(), repo.Create(models.Order{
+	_, err = repo.Create(models.Order{
 		FileName:     "filename1",
 		StoringName:  "storingname1",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
-	require.NoError(r.T(), repo.Create(models.Order{
+	})
+
+	require.NoError(r.T(), err)
+
+	_, err = repo.Create(models.Order{
 		FileName:     "filename2",
 		StoringName:  "storingname2",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
+	})
+
+	require.NoError(r.T(), err)
 
 	orders, err = repo.GetMany(1)
 	require.NoError(r.T(), err)
@@ -203,52 +211,54 @@ func (r *RepositoryTestSuite) TestOrderRepository_UpdateStatus() {
 
 	testTime := time.Now()
 
-	require.NoError(r.T(), repo.Create(models.Order{
+	orderId, err := repo.Create(models.Order{
 		FileName:     "filename",
 		StoringName:  "storingname",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
+	})
+
+	require.NoError(r.T(), err)
 
 	require.NoError(r.T(), sRepo.Create("new status"))
 
 	tests := []struct {
-		name        string
-		storingname string
-		status      int64
-		userId      int64
-		isErr       bool
+		name    string
+		orderId int64
+		status  int64
+		userId  int64
+		isErr   bool
 	}{
 		{
-			name:        "wrong stroingname",
-			storingname: "not exists",
-			status:      2,
-			userId:      1,
-			isErr:       true,
+			name:    "wrong stroingname",
+			orderId: orderId,
+			status:  2,
+			userId:  1,
+			isErr:   true,
 		},
 		{
-			name:        "wrong status id",
-			storingname: "storingname",
-			status:      99,
-			userId:      1,
-			isErr:       true,
+			name:    "wrong status id",
+			orderId: orderId,
+			status:  99,
+			userId:  1,
+			isErr:   true,
 		},
 		{
-			name:        "correct",
-			storingname: "storingname",
-			status:      2,
-			userId:      1,
-			isErr:       false,
+			name:    "correct",
+			orderId: orderId,
+			status:  2,
+			userId:  1,
+			isErr:   false,
 		},
 	}
 
 	for _, t := range tests {
 		if t.isErr {
-			assert.Error(r.T(), repo.UpdateStatus(t.storingname, t.userId, t.status), t.name)
+			assert.Error(r.T(), repo.UpdateStatus(t.orderId, t.status), t.name)
 		} else {
-			assert.NoError(r.T(), repo.UpdateStatus(t.storingname, t.userId, t.status), t.name)
+			assert.NoError(r.T(), repo.UpdateStatus(t.orderId, t.status), t.name)
 		}
 	}
 
@@ -279,50 +289,52 @@ func (r *RepositoryTestSuite) TestOrderRepository_UpdateDownloadLink() {
 
 	testTime := time.Now()
 
-	require.NoError(r.T(), repo.Create(models.Order{
+	orderId, err := repo.Create(models.Order{
 		FileName:     "filename",
 		StoringName:  "storingname",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
+	})
+
+	require.NoError(r.T(), err)
 
 	tests := []struct {
-		name        string
-		storingname string
-		link        string
-		userId      int64
-		isErr       bool
+		name    string
+		orderId int64
+		link    string
+		userId  int64
+		isErr   bool
 	}{
 		{
-			name:        "wrong stroingname",
-			storingname: "not exists",
-			link:        "link",
-			userId:      1,
-			isErr:       true,
+			name:    "wrong stroingname",
+			orderId: orderId,
+			link:    "link",
+			userId:  1,
+			isErr:   true,
 		},
 		{
-			name:        "wrong user id",
-			storingname: "storingname",
-			link:        "link",
-			userId:      99,
-			isErr:       true,
+			name:    "wrong user id",
+			orderId: orderId,
+			link:    "link",
+			userId:  99,
+			isErr:   true,
 		},
 		{
-			name:        "correct",
-			storingname: "storingname",
-			link:        "link",
-			userId:      1,
-			isErr:       false,
+			name:    "correct",
+			orderId: orderId,
+			link:    "link",
+			userId:  1,
+			isErr:   false,
 		},
 	}
 
 	for _, t := range tests {
 		if t.isErr {
-			assert.Error(r.T(), repo.UpdateDownloadLink(t.userId, t.storingname, t.link), t.name)
+			assert.Error(r.T(), repo.UpdateDownloadLink(t.orderId, t.link), t.name)
 		} else {
-			assert.NoError(r.T(), repo.UpdateDownloadLink(t.userId, t.storingname, t.link), t.name)
+			assert.NoError(r.T(), repo.UpdateDownloadLink(t.orderId, t.link), t.name)
 		}
 	}
 
@@ -356,14 +368,16 @@ func (r *RepositoryTestSuite) TestOrderRepository_SoftDelete() {
 
 	testTime := time.Now()
 
-	require.NoError(r.T(), repo.Create(models.Order{
+	_, err = repo.Create(models.Order{
 		FileName:     "filename",
 		StoringName:  "storingname",
 		CreationDate: testTime,
 		UserId:       1,
 		StatusId:     1,
 		IsDeleted:    false,
-	}))
+	})
+
+	require.NoError(r.T(), err)
 
 	order, err = repo.GetOne(1)
 	require.NoError(r.T(), err)

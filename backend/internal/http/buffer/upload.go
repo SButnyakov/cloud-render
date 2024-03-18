@@ -6,6 +6,7 @@ import (
 	"cloud-render/internal/lib/sl"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -41,10 +42,19 @@ func Upload(log *slog.Logger, provider OrdersImageUpdater) http.HandlerFunc {
 
 		uid := chi.URLParam(r, "uid")
 
+		id := chi.URLParam(r, "id")
+		idInt64, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			log.Error("invalid order id", sl.Err(err))
+			responseError(w, r, resp.Error("invalid order id"), http.StatusBadRequest)
+			return
+		}
+
 		err = provider.UpdateOrderImage(dto.UpdateOrderImageDTO{
-			UserId: uid,
-			File:   file,
-			Header: header,
+			OrderId: idInt64,
+			UserId:  uid,
+			File:    file,
+			Header:  header,
 		})
 		if err != nil {
 			log.Error("failed to upload image", sl.Err(err))

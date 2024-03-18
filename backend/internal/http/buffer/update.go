@@ -26,21 +26,19 @@ func Update(log *slog.Logger, updater OrderStatusUpdater) http.HandlerFunc {
 			slog.String("request_id", middleware.GetReqID(r.Context())),
 		)
 
-		id := chi.URLParam(r, "uid")
+		id := chi.URLParam(r, "id")
 		idInt64, err := strconv.ParseInt(id, 10, 64)
 		if err != nil {
-			log.Error("invalid user id", sl.Err(err))
-			responseError(w, r, resp.Error("invalid user id"), http.StatusBadRequest)
+			log.Error("invalid order id", sl.Err(err))
+			responseError(w, r, resp.Error("invalid order id"), http.StatusBadRequest)
 			return
 		}
 
-		fileName := chi.URLParam(r, "filename")
 		status := strings.ReplaceAll(chi.URLParam(r, "status"), "-", " ")
 
 		err = updater.UpdateOrderStatus(dto.UpdateOrderStatusDTO{
-			UserId:      idInt64,
-			StoringName: fileName,
-			Status:      status,
+			OrderId: idInt64,
+			Status:  status,
 		})
 		if err != nil {
 			log.Error("failed to update status", sl.Err(err))

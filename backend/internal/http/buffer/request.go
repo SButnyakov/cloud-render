@@ -19,6 +19,7 @@ import (
 
 type RequestResponse struct {
 	resp.Response
+	OrderId      int64  `json:"order_id"`
 	Format       string `json:"format"`
 	Resolution   string `json:"resolution"`
 	DownloadLink string `json:"download_link,omitempty"`
@@ -56,15 +57,15 @@ func Request(log *slog.Logger, client *redis.Client, cfg *config.Config) http.Ha
 			return
 		}
 
-		fmt.Println(newOrder)
-
 		pathList := strings.Split(newOrder.SavePath, "/")
 		listLength := len(pathList)
 
 		downloadLink := fmt.Sprintf("http://%s:%d/%s/blend/download/%s", cfg.HTTPServer.Host, cfg.HTTPServer.Port, pathList[listLength-2], pathList[listLength-1])
 
+		log.Info("gave new order")
 		responseOK(w, r, RequestResponse{
 			Response:     resp.OK(),
+			OrderId:      newOrder.OrderId,
 			Format:       newOrder.Format,
 			Resolution:   newOrder.Resolution,
 			DownloadLink: downloadLink,

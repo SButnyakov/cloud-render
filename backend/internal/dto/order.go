@@ -22,13 +22,13 @@ type GetOrderDTO struct {
 }
 
 type UpdateOrderStatusDTO struct {
-	UserId      int64
-	StoringName string
-	Status      string
+	OrderId int64
+	Status  string
 }
 
 type UpdateOrderImageDTO struct {
-	UserId string
-	File   multipart.File
-	Header *multipart.FileHeader
+	OrderId int64
+	UserId  string
+	File    multipart.File
+	Header  *multipart.FileHeader
 }

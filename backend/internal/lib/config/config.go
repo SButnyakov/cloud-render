@@ -37,17 +37,22 @@ type DB struct {
 }
 
 type Paths struct {
-	SignUp    string `yaml:"signup" env-default:"/signup"`
-	SignIn    string `yaml:"signin" env-default:"/signin"`
-	Refresh   string `yaml:"refresh" env-default:"/refresh"`
-	Edit      string `yaml:"edit" env-default:"/user/edit"`
-	Info      string `yaml:"info" env-default:"/info"`
-	User      string `yaml:"user" env-default:"/user"`
-	Subscribe string `yaml:"subscribe" env-default:"/subscribe"`
-	Send      string `yaml:"send" env-default:"/send"`
-	Orders    Orders `yaml:"orders"`
-	Request   string `yaml:"request" env-default:"/request"`
-	UID       UID    `yaml:"uid"`
+	SignUp       string       `yaml:"signup" env-default:"/signup"`
+	SignIn       string       `yaml:"signin" env-default:"/signin"`
+	Refresh      string       `yaml:"refresh" env-default:"/refresh"`
+	Edit         string       `yaml:"edit" env-default:"/user/edit"`
+	Info         string       `yaml:"info" env-default:"/info"`
+	User         string       `yaml:"user" env-default:"/user"`
+	Subscribe    string       `yaml:"subscribe" env-default:"/subscribe"`
+	Send         string       `yaml:"send" env-default:"/send"`
+	Orders       Orders       `yaml:"orders"`
+	Request      string       `yaml:"request" env-default:"/request"`
+	UID          UID          `yaml:"uid"`
+	Placeholders Placeholders `yaml:"placeholders"`
+}
+
+type Placeholders struct {
+	Id string `yaml:"id"`
 }
 
 type Orders struct {

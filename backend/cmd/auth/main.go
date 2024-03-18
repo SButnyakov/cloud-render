@@ -79,7 +79,7 @@ func main() {
 	router.Post(cfg.Paths.SignUp, auth.SignUp(log, userService))
 	router.Post(cfg.Paths.SignIn, auth.SignIn(log, userService))
 
-	router.Get(cfg.Paths.Info, auth.Info(log, userService))
+	router.Get(fmt.Sprintf("%s%s", cfg.Paths.Info, cfg.Paths.Placeholders.Id), auth.Info(log, userService))
 	router.Put(cfg.Paths.Refresh, auth.Refresh(log, userService))
 	router.Route("/", func(editRouter chi.Router) {
 		editRouter.Use(authMw.New(log, jwtManager))

@@ -30,6 +30,7 @@ const (
 )
 
 type ServerResponse struct {
+	OrderId      int64  `json:"order_id"`
 	Status       string `json:"status"`
 	Format       string `json:"format"`
 	Resolution   string `json:"resolution"`
@@ -78,18 +79,18 @@ func main() {
 		err = downloadFile(resp.DownloadLink, filename)
 		if err != nil {
 			log.Println(err)
-			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
+			updateStatus(cfg, uid, cfg.UpdateStatus.Error, resp.OrderId)
 			time.Sleep(cfg.SleepTime)
 			continue
 		}
 
 		log.Println("updating status: IN PROGRESS")
 
-		err = updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.InProgress)
+		err = updateStatus(cfg, uid, cfg.UpdateStatus.InProgress, resp.OrderId)
 		if err != nil {
 			log.Println(err)
 			log.Println("updating status: ERROR")
-			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
+			updateStatus(cfg, uid, cfg.UpdateStatus.Error, resp.OrderId)
 			time.Sleep(cfg.SleepTime)
 			continue
 		}
@@ -113,7 +114,7 @@ func main() {
 			log.Println("failed to render scene")
 			// os.Remove(filename)
 			// os.Remove("frame0000.png")
-			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
+			updateStatus(cfg, uid, cfg.UpdateStatus.Error, resp.OrderId)
 			continue
 		}
 
@@ -122,11 +123,11 @@ func main() {
 		err = changeImage(settings)
 		if err != nil {
 			// os.Remove(fmt.Sprintf("%s.%s", settings.Filename, settings.Format))
-			updateStatus(cfg, uid, linkFilename, cfg.UpdateStatus.Error)
+			updateStatus(cfg, uid, cfg.UpdateStatus.Error, resp.OrderId)
 			continue
 		}
 
-		status, err := uploadFile(cfg, imageName, uid)
+		status, err := uploadFile(cfg, resp.OrderId, imageName, uid)
 		if err != nil {
 			log.Println(err)
 			log.Println("failed to send file")
@@ -270,10 +271,10 @@ func downloadFile(url, filename string) error {
 	return nil
 }
 
-func updateStatus(cfg *config.Config, uid, linkFilename, status string) error {
+func updateStatus(cfg *config.Config, uid, status string, orderId int64) error {
 	req, err := http.NewRequest(
 		http.MethodPut,
-		fmt.Sprintf("%s/%s/blend/update/%s/%s", cfg.BaseURL, uid, linkFilename+".blend", status),
+		fmt.Sprintf("%s/%s/blend/update/%d/%s", cfg.BaseURL, uid, orderId, status),
 		nil)
 	if err != nil {
 		fmt.Println("failed to create request")
@@ -301,8 +302,8 @@ func runBlender(cfg *config.Config, filename, script string) error {
 	return cmd.Run()
 }
 
-func uploadFile(cfg *config.Config, filename, uid string) (int, error) {
-	postURL := cfg.BaseURL + fmt.Sprintf("/%s/image/upload", uid)
+func uploadFile(cfg *config.Config, orderId int64, filename, uid string) (int, error) {
+	postURL := cfg.BaseURL + fmt.Sprintf("/%s/image/%d/upload", uid, orderId)
 
 	wd, err := os.Getwd()
 	if err != nil {
