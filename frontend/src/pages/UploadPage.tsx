@@ -185,7 +185,6 @@ const UploadPage = observer(() => {
               <p>Format:</p>
               
               <select
-                placeholder="format"
                 value={formatSettings}
                 onChange={(e) => setFormatSettings(e.target.value)}
               >
@@ -195,7 +194,6 @@ const UploadPage = observer(() => {
 
               <p>Resolution:</p>
               <select
-                placeholder="resolution" 
                 value={resolutionSettings} 
                 onChange={(e) => setResolutionSettings(e.target.value)}
               >
