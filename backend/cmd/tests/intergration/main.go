@@ -142,6 +142,20 @@ func main() {
 		log.Printf("TestOrdersUpdate [FAIL]: %s\n", msg)
 	}
 
+	// OrdersDelete
+	isPassed, msg, err = suite.TestOrdersDelete()
+	all++
+	if err != nil {
+		errored++
+		log.Printf("TestOrdersDelete [ERROR]: %s\n", err.Error())
+	} else if isPassed {
+		passed++
+		log.Printf("TestOrdersDelete [PASS]")
+	} else {
+		failed++
+		log.Printf("TestOrdersDelete [FAIL]: %s\n", msg)
+	}
+
 	log.Printf("Tests summary:\n\tPASSED [%d/%d]\n\tFAILED [%d/%d]\n\tERRORED [%d/%d]\n", passed, all, failed, all, errored, all)
 	if passed == all {
 		log.Println("TESTS PASSED")

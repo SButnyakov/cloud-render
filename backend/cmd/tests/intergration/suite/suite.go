@@ -467,6 +467,95 @@ func (s *InegrationTestsSuite) TestSubscribeUser() (bool, string, error) {
 	return true, "", nil
 }
 
+func (s *InegrationTestsSuite) TestOrdersDelete() (bool, string, error) {
+	defer s.logout()
+
+	login := "ordDeleteLogin"
+	email := "ordDelete@email.com"
+	password := "ordDeletePassword"
+
+	// Register and sign in
+
+	_, err := s.RegisterAndSignIn(login, email, password)
+	if err != nil {
+		return false, "", fmt.Errorf("failed to log in: %s", err.Error())
+	}
+
+	// Send
+
+	filename := "temp.blend"
+	format := "png"
+	resolution := "1920x1080"
+
+	resParams, err := s.apiTestClient.Send(filename, format, resolution)
+	if err != nil {
+		return false, "", err
+	}
+
+	if resParams.Code != http.StatusCreated {
+		return false, "", fmt.Errorf("failed to create new order. code: %d, body: %s", resParams.Code, string(resParams.Body))
+	}
+
+	// Orders
+
+	resParams, err = s.apiTestClient.Orders()
+	if err != nil {
+		return false, "", err
+	}
+
+	if resParams.Code != http.StatusOK {
+		return false, "", fmt.Errorf("failed to get user orders. code: %d, body: %s", resParams.Code, string(resParams.Body))
+	}
+
+	var ordersResponse api.GetManyOrdersResponse
+
+	err = json.Unmarshal(resParams.Body, &ordersResponse)
+	if err != nil {
+		return false, "", fmt.Errorf("failed to unmarshal orders response: %s", err.Error())
+	}
+
+	if len(ordersResponse.Orders) != 1 {
+		return false, fmt.Sprintf("wrong number of orders. expected: 1, actual: %d", len(ordersResponse.Orders)), nil
+	}
+
+	order := ordersResponse.Orders[0]
+
+	// Delete
+
+	resParams, err = s.apiTestClient.SoftDelete(strconv.FormatInt(order.Id, 10))
+	if err != nil {
+		return false, "", err
+	}
+
+	if resParams.Code != http.StatusOK {
+		return false, "", fmt.Errorf("failed to delete order. code: %d, body: %s", resParams.Code, string(resParams.Body))
+	}
+
+	// Orders
+
+	resParams, err = s.apiTestClient.Orders()
+	if err != nil {
+		return false, "", err
+	}
+
+	if resParams.Code != http.StatusOK {
+		return false, "", fmt.Errorf("failed to get user orders. code: %d, body: %s", resParams.Code, string(resParams.Body))
+	}
+
+	var newOrdersResponse api.GetManyOrdersResponse
+
+	err = json.Unmarshal(resParams.Body, &newOrdersResponse)
+	if err != nil {
+		return false, "", fmt.Errorf("failed to unmarshal orders response: %s", err.Error())
+	}
+
+	if len(newOrdersResponse.Orders) != 0 {
+		return false, fmt.Sprintf("wrong number of orders. expected: 0, actual: %d", len(newOrdersResponse.Orders)), nil
+	}
+
+	return true, "", nil
+}
+
 func (s *InegrationTestsSuite) TestUserEdit() (bool, string, error) {
 	defer s.logout()
 

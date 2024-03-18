@@ -70,6 +70,20 @@ func (c *APITestClient) Send(filename, format, resolution string) (*test.Respons
 	})
 }
 
+func (c *APITestClient) SoftDelete(orderId string) (*test.ResponseParams, error) {
+	return test.MakeRequest(test.RequestParams{
+		Method: "POST",
+		URL: fmt.Sprintf("http://%s:%d%s/%s/delete",
+			c.Config.HTTPServer.Host,
+			c.Config.HTTPServer.Port,
+			c.Config.Paths.Orders.Root,
+			orderId),
+		Headers: test.HeadersMap{
+			"Authorization": fmt.Sprintf("Bearer %s", c.AccessToken),
+		},
+	})
+}
+
 func (c *APITestClient) Subscribe() (*test.ResponseParams, error) {
 	return test.MakeRequest(test.RequestParams{
 		Method: "POST",
