@@ -18,18 +18,18 @@ func NewOrderRepository(db *sql.DB) *OrderRepository {
 func (o *OrderRepository) Create(order models.Order) (int64, error) {
 	const fn = packagePath + "order.Create"
 
-	stmt, err := o.db.Prepare("INSERT INTO orders (filename, storingname, creation_date, user_id, status_id, is_deleted) VALUES ($1, $2, $3, $4, $5, $6)")
+	stmt, err := o.db.Prepare("INSERT INTO orders (filename, storingname, creation_date, user_id, status_id, is_deleted) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id")
 	if err != nil {
 		return 0, fmt.Errorf("%s: prepare statement: %w", fn, err)
 	}
 	defer stmt.Close()
 
-	res, err := stmt.Exec(order.FileName, order.StoringName, order.CreationDate, order.UserId, order.StatusId, false)
+	var lastInsertedId int64
+
+	err = stmt.QueryRow(order.FileName, order.StoringName, order.CreationDate, order.UserId, order.StatusId, false).Scan(&lastInsertedId)
 	if err != nil {
 		return 0, fmt.Errorf("%s: execute statement: %w", fn, err)
 	}
-
-	lastInsertedId, _ := res.LastInsertId()
 
 	return lastInsertedId, nil
 }
