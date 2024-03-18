@@ -38,7 +38,6 @@ export const AppRouter = observer(() => {
           />
         </>
       )}
-
     </Routes>
   )
 })
