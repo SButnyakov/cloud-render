@@ -40,7 +40,7 @@ jobs:
             node-version: '18.16.0'
       - name: installing local dependencies
         working-directory: ./frontend
-        run: npm i --legacy-peer-deps 1> /dev/null
+        run: npm i 1> /dev/null
         timeout-minutes: 10
       - name: integration tests frontend
         working-directory: ./frontend
@@ -110,7 +110,7 @@ jobs:
             node-version: '18.16.0'
       - name: installing local dependencies
         working-directory: ./frontend
-        run: npm i --legacy-peer-deps 1> /dev/null
+        run: npm i 1> /dev/null
         timeout-minutes: 10
       - name: prepare script for modification
         run: chmod +x ./CI-change.sh
