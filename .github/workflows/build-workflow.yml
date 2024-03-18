@@ -28,7 +28,7 @@ jobs:
       - name: disable database
         if: always()
         run: docker-compose down
-  frontend-test:
+  frontend-integration-test:
     runs-on: self-hosted
     needs: docker-build
     steps:
@@ -68,7 +68,7 @@ jobs:
         run: docker-compose up -d
       - name: integration testing backend
         working-directory: ./backend/cmd/tests/intergration
-        run: go test ./... -v
+        run: go run main.go
         timeout-minutes: 10
       - name: disable project
         if: always()
