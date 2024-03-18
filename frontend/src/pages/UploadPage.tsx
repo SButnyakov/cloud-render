@@ -185,7 +185,6 @@ const UploadPage = observer(() => {
               <p>Format:</p>
               
               <select
-                placeholder="format"
                 value={formatSettings}
                 onChange={(e) => setFormatSettings(e.target.value)}
               >
